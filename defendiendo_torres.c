@@ -252,12 +252,10 @@ int agregar_defensor(nivel_t* nivel, coordenada_t posicion, char tipo){
 }
 
 int estado_nivel(nivel_t nivel){
-    if (enemigos_muertos(nivel) == nivel.max_enemigos_nivel){
+    if (enemigos_muertos(nivel) >= nivel.max_enemigos_nivel){
         return NIVEL_GANADO;
     }
-    else {
-        return NIVEL_JUGANDO;
-    }
+    return NIVEL_JUGANDO;
 }
 
 int danio_defensor(juego_t juego, int numero_defensor){
@@ -434,11 +432,18 @@ void jugar_turno(juego_t* juego){
     jugar_turno_orcos(juego);
 }
 
+bool torres_destruiudas(juego_t juego){
+    if (juego.torres.resistencia_torre_1 <= RESISTENCIA_TORRE_DESTRUIDA || juego.torres.resistencia_torre_2 <= RESISTENCIA_TORRE_DESTRUIDA){
+        return true;
+    }
+    return false;
+}
+
 int estado_juego(juego_t juego){
-    if ((juego.nivel_actual == NIVEL_4) && (enemigos_muertos(juego.nivel) >= juego.nivel.max_enemigos_nivel) && (juego.torres.resistencia_torre_1 > RESISTENCIA_TORRE_DESTRUIDA) && (juego.torres.resistencia_torre_2 > RESISTENCIA_TORRE_DESTRUIDA)){
+    if ((juego.nivel_actual == NIVEL_4) && (estado_nivel(juego.nivel) == NIVEL_GANADO) && (!torres_destruiudas(juego))){
         return JUEGO_GANADO;
     }
-    else if(juego.torres.resistencia_torre_1 <= RESISTENCIA_TORRE_DESTRUIDA || juego.torres.resistencia_torre_2 <= RESISTENCIA_TORRE_DESTRUIDA){
+    else if(torres_destruiudas(juego)){
         return JUEGO_PERDIDO;
     }
     else {
