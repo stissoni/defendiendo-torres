@@ -162,7 +162,7 @@ void mostrar_juego(juego_t juego){
         for (int col = 0; col < columnas_terreno; col++){
             if (col == 0){
                 if (fil == 0){
-                    if (terreno[fil][col] == ORCO){
+                    if (terreno[fil][col] == ORCO || terreno[fil][col] == ENANO || terreno[fil][col] == ELFO){
                         printf(" 0 |   %c ", terreno[fil][col]);
                     }
                     else {
