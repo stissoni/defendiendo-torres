@@ -241,7 +241,6 @@ void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordena
     }
 }
 
-
 bool es_par(int numero){
     if (numero % 2 == 0){
         return true;
