@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio_ext.h>
 #include <stdbool.h>
+#include <time.h>
 #include "animos.h"
 #include "defendiendo_torres.h"
 #include "utiles.h"
@@ -49,7 +50,7 @@ int main(){
     /* ................... JUGAR PARTIDA ................... */
     juego_t juego;
     inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-    for (int nivel = NIVEL_2; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
+    for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         system("clear");
         inicializar_nivel(&juego, nivel);
         int defensores_extra_colocados = 0;
@@ -58,9 +59,9 @@ int main(){
             system("clear");
             jugar_turno(&juego);
             mostrar_juego(juego);
-            /*if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
+            if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
                 colocar_defensor_extra(&juego,&defensores_extra_colocados);
-            }*/
+            }
             detener_el_tiempo(0.1);
         }     
     }
