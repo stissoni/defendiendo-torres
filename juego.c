@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio_ext.h>
 #include <stdbool.h>
+#include <time.h>
 #include "animos.h"
 #include "defendiendo_torres.h"
 #include "utiles.h"
@@ -41,6 +42,7 @@ void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
 
 int main(){
+    srand((unsigned)time(NULL));
     /* ................... CONDICIONES INICIALES ................... */
     int viento, humedad;
     char animo_legolas, animo_gimli;
@@ -48,7 +50,7 @@ int main(){
     /* ................... JUGAR PARTIDA ................... */
     juego_t juego;
     inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-    for (int nivel = NIVEL_3; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
+    for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         system("clear");
         inicializar_nivel(&juego, nivel);
         int defensores_extra_colocados = 0;
@@ -60,7 +62,7 @@ int main(){
             if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
                 colocar_defensor_extra(&juego,&defensores_extra_colocados);
             }
-            detener_el_tiempo(0.2);
+            detener_el_tiempo(0.1);
         }     
     }
     /* ................... RESULTADO FINAL ................... */
@@ -196,6 +198,57 @@ void limpiar_defensores(nivel_t* nivel){
     }
 }
 
+void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordenada_t* torre){
+    if ((*juego).nivel_actual == NIVEL_1){
+        (*entrada).fil = 9;
+        (*entrada).col = 14;
+        (*torre).fil = 3;
+        (*torre).col = 0;
+    }
+    else if ((*juego).nivel_actual == NIVEL_2){
+        (*entrada).fil = 3;
+        (*entrada).col = 0;
+        (*torre).fil = 9;
+        (*torre).col = 14;
+    }
+    else if ((*juego).nivel_actual == NIVEL_3){
+        if ((*juego).nivel.tope_camino_1 == 0){
+            (*entrada).fil = 0;
+            (*entrada).col = 4;
+            (*torre).fil = 19;
+            (*torre).col = 4;
+        }
+        else {
+            (*entrada).fil = 0;
+            (*entrada).col = 16;
+            (*torre).fil = 19;
+            (*torre).col = 16;
+        }
+    }
+    else {
+        if ((*juego).nivel.tope_camino_1 == 0){
+            (*entrada).fil = 19;
+            (*entrada).col = 4;
+            (*torre).fil = 0;
+            (*torre).col = 4;
+        }
+        else {
+            (*entrada).fil = 19;
+            (*entrada).col = 16;
+            (*torre).fil = 0;
+            (*torre).col = 16;
+        }
+    }
+}
+
+
+bool es_par(int numero){
+    if (numero % 2 == 0){
+        return true;
+    }
+    return false;
+}
+
 /* Recibe el juego, y el nivel actual.
  * Inicializa en nivel, con los caminos, y posiciona los defensores.
  */
@@ -210,27 +263,17 @@ void inicializar_nivel(juego_t* juego, int nivel){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
         printf("\nNIVEL 1\n\n");
         coordenada_t entrada, torre;
-        entrada.fil = 9;
-        entrada.col = 14;
-        torre.fil = 3;
-        torre.col = 0;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        limpiar_defensores(&(*juego).nivel);
-        mostrar_juego(*juego);
         numero_defensores = DEFENSORES_NIVEL_1;
         tipo_defensor = ENANO;
     }
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
-        coordenada_t entrada, torre;
-        entrada.fil = 3;
-        entrada.col = 0;
-        torre.fil = 9;
-        torre.col = 14;
         printf("\nNIVEL 2\n\n");
+        coordenada_t entrada, torre;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        limpiar_defensores(&(*juego).nivel);
-        mostrar_juego(*juego);
         numero_defensores = DEFENSORES_NIVEL_2;
         tipo_defensor = ELFO;
     }
@@ -238,42 +281,28 @@ void inicializar_nivel(juego_t* juego, int nivel){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
         printf("\nNIVEL 3\n\n");
         coordenada_t entrada, torre;
-        entrada.fil = 0;
-        entrada.col = 4;
-        torre.fil = 19;
-        torre.col = 4;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        entrada.fil = 0;
-        entrada.col = 16;
-        torre.fil = 19;
-        torre.col = 16;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        limpiar_defensores(&(*juego).nivel);
-        mostrar_juego(*juego);
         numero_defensores = DEFENSORES_NIVEL_3;
     }
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
         printf("\nNIVEL 4\n\n");
         coordenada_t entrada, torre;
-        entrada.fil = 19;
-        entrada.col = 4;
-        torre.fil = 0;
-        torre.col = 4;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        entrada.fil = 19;
-        entrada.col = 16;
-        torre.fil = 0;
-        torre.col = 16;
+        inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        limpiar_defensores(&(*juego).nivel);
-        mostrar_juego(*juego);
         numero_defensores = DEFENSORES_NIVEL_4;
     }
+    limpiar_defensores(&(*juego).nivel);
+    mostrar_juego(*juego);
     /* ................... DEFENSORES ................... */
     for (int defensor = 0; defensor < numero_defensores; defensor++){
         if (nivel == NIVEL_3 || nivel == NIVEL_4){
-            if (defensor % 2 == 0){
+            if (es_par(defensor)){
                 tipo_defensor = ENANO;
             }
             else {
