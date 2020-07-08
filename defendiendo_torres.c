@@ -211,6 +211,9 @@ void mostrar_juego(juego_t juego){
     printf("\n");
 }
 
+/* Recibe el nivel y dos coordenadas. Verifica si las coordenadas estan disponibles para colocar un defensor
+ * Devuelve true en caso afirmativo, false en caso contrario.
+ */
 bool defensor_posicion_correcta(nivel_t nivel, int fila, int columna){
     for (int i = 0; i < nivel.tope_camino_1; i++ ){
         if ((fila == nivel.camino_1[i].fil) && (columna == nivel.camino_1[i].col)){
@@ -259,6 +262,9 @@ int estado_nivel(nivel_t nivel){
     return NIVEL_JUGANDO;
 }
 
+/* Recibe el juego y el numero de defensor para verificar si es Orco o Elfo. 
+ * Aleatoriamente decidida si el ataque falla, es critico o normal. Devuelve el danio que provocara el ataque del defensor.
+ */
 int danio_defensor(juego_t juego, int numero_defensor){
     if (juego.nivel.defensores[numero_defensor].tipo == ENANO){
         if (rand()%100 < juego.fallo_gimli){
