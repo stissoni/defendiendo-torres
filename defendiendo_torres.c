@@ -381,6 +381,12 @@ void jugar_turno_elfos(juego_t* juego){
     }
 }
 
+void orcos_avanzan(juego_t* juego){
+    for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
+        ((*juego).nivel.enemigos[i].pos_en_camino)++;
+    }
+}
+
 void orcos_atacan_torre(juego_t* juego){
     for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
         if ((*juego).nivel.enemigos[i].pos_en_camino == (*juego).nivel.tope_camino_1 - 1 && (*juego).nivel.enemigos[i].camino == CAMINO_1  && (*juego).nivel.enemigos[i].vida > VIDA_ORCO_MUERTO){
@@ -408,9 +414,7 @@ void jugar_turno_orcos(juego_t* juego){
         (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].camino = CAMINO_2;   
         (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
     }
-    for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
-        ((*juego).nivel.enemigos[i].pos_en_camino)++;
-    }
+    orcos_avanzan(juego);
     if ((*juego).nivel.tope_enemigos < (*juego).nivel.max_enemigos_nivel){
         if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_2){
             ((*juego).nivel.tope_enemigos)++;
