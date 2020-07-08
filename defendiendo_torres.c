@@ -42,6 +42,9 @@
 #define POSICION_INICIAL_ORCO 0
 #define VIDA_ORCO_EXTRA_MAX 100
 
+/* Recibe el nivel, itera el vector de orcos.
+ * Devuelve el numero de orcos con vida igual o menor a 0.
+ */
 int enemigos_muertos(nivel_t nivel){
     int enemigos_muertos = 0;
     for (int i = 0; i < nivel.tope_enemigos; i++){
@@ -227,9 +230,7 @@ bool defensor_posicion_correcta(nivel_t nivel, int fila, int columna){
     if (fila < 0 || columna < 0){
         return false;
     }
-    else {
-        return true;
-    }
+    return true;
 }
 
 int agregar_defensor(nivel_t* nivel, coordenada_t posicion, char tipo){
@@ -381,6 +382,33 @@ void jugar_turno_elfos(juego_t* juego){
     }
 }
 
+void inicializar_orcos(juego_t* juego){
+    (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].pos_en_camino = POSICION_INICIAL_ORCO;
+    (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
+    if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){
+        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].camino = CAMINO_1;
+    }
+    if ((*juego).nivel_actual == NIVEL_2){
+        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].camino = CAMINO_2;
+    }
+    if ((*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){   
+        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].pos_en_camino = POSICION_INICIAL_ORCO;
+        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].camino = CAMINO_2;   
+        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
+    }
+}
+
+void aumentar_tope_orcos(juego_t* juego){
+    if ((*juego).nivel.tope_enemigos < (*juego).nivel.max_enemigos_nivel){
+        if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_2){
+            ((*juego).nivel.tope_enemigos)++;
+        }
+        if ((*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){
+            ((*juego).nivel.tope_enemigos) = ((*juego).nivel.tope_enemigos) + 2;
+        }
+    }
+}
+
 void orcos_avanzan(juego_t* juego){
     for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
         ((*juego).nivel.enemigos[i].pos_en_camino)++;
@@ -401,41 +429,21 @@ void orcos_atacan_torre(juego_t* juego){
 }
 
 void jugar_turno_orcos(juego_t* juego){
-    (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].pos_en_camino = POSICION_INICIAL_ORCO;
-    (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
-    if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){
-        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].camino = CAMINO_1;
-    }
-    if ((*juego).nivel_actual == NIVEL_2){
-        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].camino = CAMINO_2;
-    }
-    if ((*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){   
-        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].pos_en_camino = POSICION_INICIAL_ORCO;
-        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].camino = CAMINO_2;   
-        (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos + 1].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
-    }
+    inicializar_orcos(juego);
     orcos_avanzan(juego);
-    if ((*juego).nivel.tope_enemigos < (*juego).nivel.max_enemigos_nivel){
-        if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_2){
-            ((*juego).nivel.tope_enemigos)++;
-        }
-        if ((*juego).nivel_actual == NIVEL_3 || (*juego).nivel_actual == NIVEL_4){
-            ((*juego).nivel.tope_enemigos) = ((*juego).nivel.tope_enemigos) + 2;
-        }
-    }
+    aumentar_tope_orcos(juego);
     orcos_atacan_torre(juego);
 }
 
 void jugar_turno(juego_t* juego){
-    srand((unsigned)time(NULL));
-    // ATACAN ENANOS
     jugar_turno_enanos(juego);
-    // ATACAN ELFOS
     jugar_turno_elfos(juego);
-    // MUEVEN ENEMIGOS
     jugar_turno_orcos(juego);
 }
 
+/* Recibe el juego y verifica el estado de las torres, devuelve verdadero si la resistencia de ambas es igual o menor a 0
+ * Devuelve false en caso contrario.
+ */
 bool torres_destruiudas(juego_t juego){
     if (juego.torres.resistencia_torre_1 <= RESISTENCIA_TORRE_DESTRUIDA || juego.torres.resistencia_torre_2 <= RESISTENCIA_TORRE_DESTRUIDA){
         return true;

@@ -41,6 +41,7 @@ void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
 
 int main(){
+    srand((unsigned)time(NULL));
     /* ................... CONDICIONES INICIALES ................... */
     int viento, humedad;
     char animo_legolas, animo_gimli;
