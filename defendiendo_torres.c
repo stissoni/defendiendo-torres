@@ -407,6 +407,9 @@ void inicializar_orcos(juego_t* juego){
     }
 }
 
+/* Se aumenta el tope del vector orcos, conforme avanzan por el camino. Depende del nivel.
+ *
+ */
 void aumentar_tope_orcos(juego_t* juego){
     if ((*juego).nivel.tope_enemigos < (*juego).nivel.max_enemigos_nivel){
         if ((*juego).nivel_actual == NIVEL_1 || (*juego).nivel_actual == NIVEL_2){
@@ -418,12 +421,17 @@ void aumentar_tope_orcos(juego_t* juego){
     }
 }
 
+/* Se itera sobre el vector de orcos, y se los avanza a cada uno, una posicion en el camino.
+ *
+ */
 void orcos_avanzan(juego_t* juego){
     for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
         ((*juego).nivel.enemigos[i].pos_en_camino)++;
     }
 }
-
+/* En el caso de ser posible, los orcos atacaran a las torres, y moriran.
+ *
+ */
 void orcos_atacan_torre(juego_t* juego){
     for (int i = 0; i < (*juego).nivel.tope_enemigos; i++){
         if ((*juego).nivel.enemigos[i].pos_en_camino == (*juego).nivel.tope_camino_1 - 1 && (*juego).nivel.enemigos[i].camino == CAMINO_1  && (*juego).nivel.enemigos[i].vida > VIDA_ORCO_MUERTO){
@@ -437,6 +445,9 @@ void orcos_atacan_torre(juego_t* juego){
     }
 }
 
+/* Recibe la estructura del juego, y ejecuta todas las acciones de los orcos.
+ *
+ */
 void jugar_turno_orcos(juego_t* juego){
     inicializar_orcos(juego);
     orcos_avanzan(juego);
