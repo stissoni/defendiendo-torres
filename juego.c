@@ -191,13 +191,6 @@ void colocar_defensor(juego_t* juego, char tipo_defensor){
     }
 }
 
-void limpiar_defensores(nivel_t* nivel){
-    for (int defensor = 0; defensor < MAX_DEFENSORES; defensor ++){
-        (*nivel).defensores[defensor].posicion.fil = 42;
-        (*nivel).defensores[defensor].posicion.col = 42;
-    }
-}
-
 void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordenada_t* torre){
     if ((*juego).nivel_actual == NIVEL_1){
         (*entrada).fil = 9;
@@ -255,6 +248,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     int numero_defensores;
     char tipo_defensor;
     (*juego).nivel_actual = nivel;
+    (*juego).nivel.tope_defensores = 0;
     (*juego).nivel.tope_enemigos = 0;
     (*juego).nivel.tope_camino_1 = 0;
     (*juego).nivel.tope_camino_2 = 0;
@@ -296,7 +290,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_4;
     }
-    limpiar_defensores(&(*juego).nivel);
     mostrar_juego(*juego);
     /* ................... DEFENSORES ................... */
     for (int defensor = 0; defensor < numero_defensores; defensor++){

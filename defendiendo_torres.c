@@ -132,9 +132,7 @@ void mostrar_juego(juego_t juego){
     }
     /* ................... DEFENSORES ................... */
     for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
-        if (juego.nivel.defensores[defensor].posicion.fil != 42 && juego.nivel.defensores[defensor].posicion.col != 42){
-            terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
-        }
+        terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
     }
     /* ................... ENEMIGOS ................... */
     for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
