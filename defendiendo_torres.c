@@ -94,13 +94,11 @@ void mostrar_juego(juego_t juego){
     }
 
     char terreno[filas_terreno][columnas_terreno];
-    // Cargar el terreno
     for (int fil = 0; fil < filas_terreno; fil++){
         for (int col = 0; col < columnas_terreno; col++){
             terreno[fil][col] = VACIO;
         }
     }
-    // Cargar el camino 1 para el nivel 1
     if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
         for (int i = 0; i < juego.nivel.tope_camino_1; i++){
             terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
@@ -115,11 +113,9 @@ void mostrar_juego(juego_t juego){
             terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
         }
     }
-    /* ................... DEFENSORES ................... */
     for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
         terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
     }
-    /* ................... ENEMIGOS ................... */
     for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
         if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
             terreno[juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
@@ -128,8 +124,6 @@ void mostrar_juego(juego_t juego){
             terreno[juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
         }
     }
-  
-    /* ................... IMPRIMIENDO EL TERRENO ................... */
     printf("    ");
     for (int i = 0; i < columnas_terreno; i++){
         if (i == 0){
