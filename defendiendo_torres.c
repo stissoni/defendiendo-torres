@@ -100,30 +100,15 @@ void mostrar_juego(juego_t juego){
             terreno[fil][col] = VACIO;
         }
     }
-    /* ................... CAMINOS ................... */
     // Cargar el camino 1 para el nivel 1
-    if (juego.nivel_actual == NIVEL_1){
+    if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
         for (int i = 0; i < juego.nivel.tope_camino_1; i++){
             terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
             terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
             terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
         }
     }
-    // Cargar el camino 2 para el nivel 2
-    if (juego.nivel_actual == NIVEL_2){
-        for (int i = 0; i < juego.nivel.tope_camino_2; i++){
-            terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
-            terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
-            terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
-        }
-    }
-    // Cargar el camino 1 y 2 para el nivel 3
-    if (juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        for (int i = 0; i < juego.nivel.tope_camino_1; i++){
-            terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
-            terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
-            terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
-        }
+    if (juego.nivel_actual == NIVEL_2 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
         for (int i = 0; i < juego.nivel.tope_camino_2; i++){
             terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
             terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
