@@ -38,7 +38,7 @@
 
 void inicializar_nivel(juego_t* juego, int nivel);
 void colocar_defensor(juego_t* juego, char tipo_defensor);
-void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
 
 int main(){
@@ -60,7 +60,7 @@ int main(){
             jugar_turno(&juego);
             mostrar_juego(juego);
             if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
-                colocar_defensor_extra(&juego,&defensores_extra_colocados);
+                pedir_defensor_extra(&juego,&defensores_extra_colocados);
             }
             detener_el_tiempo(0.1);
         }     
@@ -141,7 +141,7 @@ bool torres_resistencia_suficiente(juego_t juego, char tipo_defensor){
 /* Recibe el juego y el numero de llamados a esta funcion.
  * Interactua con el usuario, verificando si quiere colocar un defensor, y de que tipo desea. Si todo es correcto, llama a la funcion que coloca el defensor.
  */
-void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
     char respuesta, tipo_defensor;
     printf("Deseas agregar defensor? (S/n): ");
     __fpurge(stdin);
@@ -191,6 +191,9 @@ void colocar_defensor(juego_t* juego, char tipo_defensor){
     }
 }
 
+/* Recibe el juego y coordenadas. Las modifica asignandole valores correspondietes a la entrada y a la torre de cada nivel
+ *
+ */
 void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordenada_t* torre){
     if ((*juego).nivel_actual == NIVEL_1){
         (*entrada).fil = 9;
@@ -234,6 +237,9 @@ void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordena
     }
 }
 
+/* Recibe un numero, verifica si es par o impar.
+ *
+ */
 bool es_par(int numero){
     if (numero % 2 == 0){
         return true;
@@ -247,6 +253,7 @@ bool es_par(int numero){
 void inicializar_nivel(juego_t* juego, int nivel){
     int numero_defensores;
     char tipo_defensor;
+    coordenada_t entrada, torre;
     (*juego).nivel_actual = nivel;
     (*juego).nivel.tope_defensores = 0;
     (*juego).nivel.tope_enemigos = 0;
@@ -255,7 +262,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
     if (nivel == NIVEL_1){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
         printf("\nNIVEL 1\n\n");
-        coordenada_t entrada, torre;
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_1;
@@ -264,7 +270,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
         printf("\nNIVEL 2\n\n");
-        coordenada_t entrada, torre;
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_2;
@@ -273,7 +278,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
     else if (nivel == NIVEL_3){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
         printf("\nNIVEL 3\n\n");
-        coordenada_t entrada, torre;
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);
@@ -283,7 +287,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
         printf("\nNIVEL 4\n\n");
-        coordenada_t entrada, torre;
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);

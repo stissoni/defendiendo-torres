@@ -92,7 +92,6 @@ void mostrar_juego(juego_t juego){
         filas_terreno = 20;
         columnas_terreno = 20;
     }
-
     char terreno[filas_terreno][columnas_terreno];
     for (int fil = 0; fil < filas_terreno; fil++){
         for (int col = 0; col < columnas_terreno; col++){
@@ -267,6 +266,9 @@ int danio_defensor(juego_t juego, int numero_defensor){
     }
 }
 
+/* Recibe el juego con el nivel ya inicializado. Itera todos los defensores, y para cada defensor busca orcos que esten al alcanze.
+ * Ataca al primero que encuentra.
+ */
 void jugar_turno_enanos(juego_t* juego){
     for (int defensor = 0; defensor < (*juego).nivel.tope_defensores; defensor++){
         if ((*juego).nivel.defensores[defensor].tipo == ENANO){
@@ -313,6 +315,9 @@ void jugar_turno_enanos(juego_t* juego){
     }
 }
 
+/* Recibe el juego con el nivel ya inicializado. Itera todos los defensores, y para cada defensor elfo busca orcos que esten al alcanze.
+ * Cada defensor atacara a los orcos que tiene al alcance.
+ */
 void jugar_turno_elfos(juego_t* juego){
     for (int defensor = 0; defensor < (*juego).nivel.tope_defensores; defensor++){
         if ((*juego).nivel.defensores[defensor].tipo == ELFO){
