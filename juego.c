@@ -90,7 +90,7 @@ bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocad
         return false;
     } 
     if (juego.nivel_actual == NIVEL_1){
-        if ((enemigos_muertos >= 25 && defensores_extra_colocados == 0 )|| (enemigos_muertos >= 50 && defensores_extra_colocados == 1) || (enemigos_muertos >= 75 && defensores_extra_colocados == 2)){
+        if ((enemigos_muertos >= 25 && defensores_extra_colocados == 0) || (enemigos_muertos >= 50 && defensores_extra_colocados == 1) || (enemigos_muertos >= 75 && defensores_extra_colocados == 2)){
             return true;
         }
     }
@@ -261,7 +261,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     (*juego).nivel.tope_camino_2 = 0;
     if (nivel == NIVEL_1){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
-        printf("\nNIVEL 1\n\n");
+        printf("NIVEL 1\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_1;
@@ -269,7 +269,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
-        printf("\nNIVEL 2\n\n");
+        printf("NIVEL 2\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_2;
@@ -277,7 +277,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else if (nivel == NIVEL_3){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
-        printf("\nNIVEL 3\n\n");
+        printf("NIVEL 3\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);
@@ -286,7 +286,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
-        printf("\nNIVEL 4\n\n");
+        printf("NIVEL 4\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);

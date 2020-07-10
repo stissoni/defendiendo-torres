@@ -360,7 +360,7 @@ void jugar_turno_elfos(juego_t* juego){
                     if ((((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                     }
-                    // Ubicaciones especiales Manhattan
+                    // Ubicaciones especiales
                     if (((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil -1) && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 2 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 2)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                     }
@@ -373,6 +373,9 @@ void jugar_turno_elfos(juego_t* juego){
     }
 }
 
+/* Recibe el juego con su nivel ya inicializado. Posiciona los orcos en la entrada del camino y les asigna el valor de su vida.
+ *
+ */
 void inicializar_orcos(juego_t* juego){
     (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].pos_en_camino = POSICION_INICIAL_ORCO;
     (*juego).nivel.enemigos[(*juego).nivel.tope_enemigos].vida = VIDA_BASICA_ORCO + rand()%VIDA_ORCO_EXTRA_MAX;
