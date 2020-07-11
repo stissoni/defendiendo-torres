@@ -41,6 +41,7 @@
 #define VIDA_ORCO_MUERTO 0
 #define POSICION_INICIAL_ORCO 0
 #define VIDA_ORCO_EXTRA_MAX 100
+#define MAX_TERRENO 100
 
 /* Recibe el nivel, itera el vector de orcos.
  * Devuelve el numero de orcos con vida igual o menor a 0.
@@ -82,47 +83,41 @@ void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legol
     }
 }
 
-void mostrar_juego(juego_t juego){
-    int filas_terreno, columnas_terreno;
+void mostrar_informacion_juego(juego_t juego){
+    printf("\nResistencia torre 1: %i \nResistencia torre 2: %i\n", juego.torres.resistencia_torre_1, juego.torres.resistencia_torre_2);
+    printf("Enemigos muertos: %i\n", enemigos_muertos(juego.nivel));
+    int enemigos_vivos = 0;
+    int i = 0;
+    while (enemigos_vivos < 3 && i < juego.nivel.tope_enemigos){
+        if (juego.nivel.enemigos[i].vida > VIDA_ORCO_MUERTO){
+            printf("Vida enemigo %i: %i HP\n", i, juego.nivel.enemigos[i].vida);
+            enemigos_vivos++;
+        }
+        i++;
+    }
+    printf("\n");
+}
+
+void imprimir_lineas(int columnas_terreno){
+    printf("    ");
+    for (int i = 0; i < columnas_terreno; i++){
+        printf(" -- ");
+    }
+     printf("\n");
+}
+
+void cargar_tamanio_terreno(juego_t juego, int* filas_terreno, int* columnas_terreno){
     if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_2){
-        filas_terreno = 15;
-        columnas_terreno = 15;
+        (*filas_terreno) = 15;
+        (*columnas_terreno) = 15;
     }
     if (juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        filas_terreno = 20;
-        columnas_terreno = 20;
+        (*filas_terreno) = 20;
+        (*columnas_terreno) = 20;
     }
-    char terreno[filas_terreno][columnas_terreno];
-    for (int fil = 0; fil < filas_terreno; fil++){
-        for (int col = 0; col < columnas_terreno; col++){
-            terreno[fil][col] = VACIO;
-        }
-    }
-    if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        for (int i = 0; i < juego.nivel.tope_camino_1; i++){
-            terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
-            terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
-            terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
-        }
-    }
-    if (juego.nivel_actual == NIVEL_2 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        for (int i = 0; i < juego.nivel.tope_camino_2; i++){
-            terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
-            terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
-            terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
-        }
-    }
-    for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
-        terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
-    }
-    for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
-        if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-            terreno[juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
-        }
-        if (juego.nivel.enemigos[enemigo].camino == CAMINO_2 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_2 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-            terreno[juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
-        }
-    }
+}
+
+void imprimir_numeros(int columnas_terreno){
     printf("    ");
     for (int i = 0; i < columnas_terreno; i++){
         if (i == 0){
@@ -132,11 +127,10 @@ void mostrar_juego(juego_t juego){
             printf(" %2.i ", i);
         }
     }
-    printf("\n    ");
-    for (int i = 0; i < columnas_terreno; i++){
-        printf(" -- ");
-    }    
     printf("\n");
+}
+
+void imprimir_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno, int columnas_terreno){
     for (int fil = 0; fil < filas_terreno; fil++){
         for (int col = 0; col < columnas_terreno; col++){
             if (col == 0){
@@ -168,23 +162,73 @@ void mostrar_juego(juego_t juego){
         }
         printf("\n");
     }
-    printf("    ");
-    for (int i = 0; i < columnas_terreno; i++){
-        printf(" -- ");
+}
+
+void cargar_camino(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO],int camino, int i){
+    if (camino == CAMINO_1){
+        terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
+        terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
+        terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
     }
-    printf("\n\n");
-    printf("Resistencia torre 1: %i \nResistencia torre 2: %i\n", juego.torres.resistencia_torre_1, juego.torres.resistencia_torre_2);
-    printf("Enemigos muertos: %i\n", enemigos_muertos(juego.nivel));
-    int enemigos_vivos = 0;
-    int i = 0;
-    while (enemigos_vivos < 3 && i < juego.nivel.tope_enemigos){
-        if (juego.nivel.enemigos[i].vida > VIDA_ORCO_MUERTO){
-            printf("Vida enemigo %i: %i HP\n", i, juego.nivel.enemigos[i].vida);
-            enemigos_vivos++;
+    else{
+        terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
+        terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
+        terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
+    }
+}
+
+void cargar_enemigos(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO], int camino, int enemigo){
+    if (camino == CAMINO_1){
+        terreno[juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+    }
+    else{
+        terreno[juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+    }
+}
+
+void cargar_defensores(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO], int defensor){
+    terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
+}
+
+void inicializar_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno, int columnas_terreno){
+    for (int fil = 0; fil < filas_terreno; fil++){
+        for (int col = 0; col < columnas_terreno; col++){
+            terreno[fil][col] = VACIO;
         }
-        i++;
     }
-    printf("\n");
+}
+
+void mostrar_juego(juego_t juego){
+    char terreno[MAX_TERRENO][MAX_TERRENO];
+    int filas_terreno, columnas_terreno;
+    cargar_tamanio_terreno(juego, &filas_terreno, &columnas_terreno);
+    inicializar_terreno(terreno, filas_terreno,columnas_terreno);
+    if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
+        for (int i = 0; i < juego.nivel.tope_camino_1; i++){
+            cargar_camino(juego, terreno, CAMINO_1, i);
+        }
+    }
+    if (juego.nivel_actual == NIVEL_2 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
+        for (int i = 0; i < juego.nivel.tope_camino_2; i++){
+            cargar_camino(juego, terreno, CAMINO_2, i);
+        }
+    }
+    for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
+        cargar_defensores(juego, terreno, defensor);
+    }
+    for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
+        if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
+            cargar_enemigos(juego, terreno, CAMINO_1, enemigo);
+        }
+        if (juego.nivel.enemigos[enemigo].camino == CAMINO_2 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_2 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
+            cargar_enemigos(juego, terreno, CAMINO_2, enemigo);
+        }
+    }
+    imprimir_numeros(columnas_terreno);
+    imprimir_lineas(columnas_terreno);
+    imprimir_terreno(terreno, columnas_terreno, filas_terreno);
+    imprimir_lineas(columnas_terreno);
+    mostrar_informacion_juego(juego);
 }
 
 /* Recibe el nivel y dos coordenadas. Verifica si las coordenadas estan disponibles para colocar un defensor
@@ -239,7 +283,7 @@ int estado_nivel(nivel_t nivel){
 }
 
 /* Recibe el juego y el numero de defensor para verificar si es Orco o Elfo. 
- * Aleatoriamente decidida si el ataque falla, es critico o normal. Devuelve el danio que provocara el ataque del defensor.
+ * Decide de manera aleatoria si el ataque falla, es normal o es critico. Devuelve el danio que provocara el ataque del defensor.
  */
 int danio_defensor(juego_t juego, int numero_defensor){
     if (juego.nivel.defensores[numero_defensor].tipo == ENANO){
@@ -276,34 +320,28 @@ void jugar_turno_enanos(juego_t* juego){
             bool enano_ataco = false;
             while(enemigo < (*juego).nivel.tope_enemigos && !enano_ataco){
                 if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    // Misma fila
                     if (((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil) && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
                     }
-                    // Misma columna
                     else if (((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
                     }
-                    // En diagonal
                     else if ((((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
                     }
                 }   
                 else if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    // Misma fila
                     if (((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil) && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
                     }
-                    // Misma columna
                     else if (((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
                     }
-                    // En diagonal
                     else if ((((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         enano_ataco = true;
@@ -324,20 +362,16 @@ void jugar_turno_elfos(juego_t* juego){
             for (int enemigo = 0; enemigo < (*juego).nivel.tope_enemigos; enemigo++){
                 if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
                     for (int i = 1; i < 4; i++){
-                        // Misma fila
                         if ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - i || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + i)){
                             (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         }
-                        // Misma columna
                         if (((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - i || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + i)){
                             (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         }
                     }
-                    // En diagonal
                     if ((((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                             (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         }
-                    // Ubicaciones especiales
                     if (((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil -1) && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 2 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_1[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 2)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                     }
@@ -347,20 +381,16 @@ void jugar_turno_elfos(juego_t* juego){
                 }
                 if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
                     for (int i = 1; i < 4; i++){
-                        // Misma fila
                         if ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - i || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + i)){
                             (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         }
-                        // Misma columna
                         if (((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - i || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + i)){
                             (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                         }
                     }
-                    // En diagonal
                     if ((((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                     }
-                    // Ubicaciones especiales
                     if (((*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1 || (*juego).nivel.defensores[defensor].posicion.fil == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].fil -1) && ((*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col - 2 || (*juego).nivel.defensores[defensor].posicion.col == (*juego).nivel.camino_2[(*juego).nivel.enemigos[enemigo].pos_en_camino].col + 2)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                     }
