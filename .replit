@@ -1,2 +1,2 @@
 language = "c"
-run = "gcc juego.c animos.c defendiendo_torres.c utiles.o - test"
+run = "gcc juego.c animos.c defendiendo_torres.c utiles.o -o test \n ./test"
