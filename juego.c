@@ -38,8 +38,9 @@
 
 void inicializar_nivel(juego_t* juego, int nivel);
 void colocar_defensor(juego_t* juego, char tipo_defensor);
-void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
+void imprimir_resultado(int estado_juego);
 
 int main(){
     srand((unsigned)time(NULL));
@@ -50,30 +51,35 @@ int main(){
     /* ................... JUGAR PARTIDA ................... */
     juego_t juego;
     inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-    for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
-        system("clear");
+    for (int nivel = NIVEL_2; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         inicializar_nivel(&juego, nivel);
         int defensores_extra_colocados = 0;
-        system("clear");
         while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
             system("clear");
             jugar_turno(&juego);
             mostrar_juego(juego);
             if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
-                colocar_defensor_extra(&juego,&defensores_extra_colocados);
+                pedir_defensor_extra(&juego,&defensores_extra_colocados);
             }
-            detener_el_tiempo(0.1);
+            detener_el_tiempo(0.2);
         }     
     }
     /* ................... RESULTADO FINAL ................... */
+    imprimir_resultado(estado_juego(juego));
+    return 0;
+}
+
+/* Recibe el estado del juego, imprime el resultado del jugador.
+ *
+ */
+void imprimir_resultado(int estado_juego){
     system("clear");
-    if (estado_juego(juego) == JUEGO_PERDIDO){
+    if (estado_juego == JUEGO_PERDIDO){
         printf("PERDISTE :(\n\n");
     }
     else {
         printf("¡¡¡GANASTE!!!\n\n");
     }
-    return 0;
 }
 
 /* Recibe el juego, y los defensores extras que fueron colocaos.
@@ -90,7 +96,7 @@ bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocad
         return false;
     } 
     if (juego.nivel_actual == NIVEL_1){
-        if ((enemigos_muertos >= 25 && defensores_extra_colocados == 0 )|| (enemigos_muertos >= 50 && defensores_extra_colocados == 1) || (enemigos_muertos >= 75 && defensores_extra_colocados == 2)){
+        if ((enemigos_muertos >= 25 && defensores_extra_colocados == 0) || (enemigos_muertos >= 50 && defensores_extra_colocados == 1) || (enemigos_muertos >= 75 && defensores_extra_colocados == 2)){
             return true;
         }
     }
@@ -141,7 +147,7 @@ bool torres_resistencia_suficiente(juego_t juego, char tipo_defensor){
 /* Recibe el juego y el numero de llamados a esta funcion.
  * Interactua con el usuario, verificando si quiere colocar un defensor, y de que tipo desea. Si todo es correcto, llama a la funcion que coloca el defensor.
  */
-void colocar_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
     char respuesta, tipo_defensor;
     printf("Deseas agregar defensor? (S/n): ");
     __fpurge(stdin);
@@ -191,6 +197,9 @@ void colocar_defensor(juego_t* juego, char tipo_defensor){
     }
 }
 
+/* Recibe el juego y coordenadas. Las modifica asignandole valores correspondietes a la entrada y a la torre de cada nivel
+ *
+ */
 void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordenada_t* torre){
     if ((*juego).nivel_actual == NIVEL_1){
         (*entrada).fil = 9;
@@ -234,6 +243,9 @@ void inicializar_entradas_torres(juego_t* juego, coordenada_t* entrada, coordena
     }
 }
 
+/* Recibe un numero, verifica si es par o impar.
+ *
+ */
 bool es_par(int numero){
     if (numero % 2 == 0){
         return true;
@@ -245,8 +257,10 @@ bool es_par(int numero){
  * Inicializa en nivel, con los caminos, y posiciona los defensores.
  */
 void inicializar_nivel(juego_t* juego, int nivel){
+    system("clear");
     int numero_defensores;
     char tipo_defensor;
+    coordenada_t entrada, torre;
     (*juego).nivel_actual = nivel;
     (*juego).nivel.tope_defensores = 0;
     (*juego).nivel.tope_enemigos = 0;
@@ -254,8 +268,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     (*juego).nivel.tope_camino_2 = 0;
     if (nivel == NIVEL_1){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
-        printf("\nNIVEL 1\n\n");
-        coordenada_t entrada, torre;
+        printf("NIVEL 1\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_1;
@@ -263,8 +276,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
-        printf("\nNIVEL 2\n\n");
-        coordenada_t entrada, torre;
+        printf("NIVEL 2\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
         numero_defensores = DEFENSORES_NIVEL_2;
@@ -272,8 +284,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else if (nivel == NIVEL_3){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
-        printf("\nNIVEL 3\n\n");
-        coordenada_t entrada, torre;
+        printf("NIVEL 3\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);
@@ -282,8 +293,7 @@ void inicializar_nivel(juego_t* juego, int nivel){
     }
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
-        printf("\nNIVEL 4\n\n");
-        coordenada_t entrada, torre;
+        printf("NIVEL 4\n\n");
         inicializar_entradas_torres(juego, &entrada, &torre);
         obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         inicializar_entradas_torres(juego, &entrada, &torre);
@@ -291,7 +301,6 @@ void inicializar_nivel(juego_t* juego, int nivel){
         numero_defensores = DEFENSORES_NIVEL_4;
     }
     mostrar_juego(*juego);
-    /* ................... DEFENSORES ................... */
     for (int defensor = 0; defensor < numero_defensores; defensor++){
         if (nivel == NIVEL_3 || nivel == NIVEL_4){
             if (es_par(defensor)){
@@ -303,5 +312,5 @@ void inicializar_nivel(juego_t* juego, int nivel){
         }
         colocar_defensor(juego, tipo_defensor);
     }
-    mostrar_juego((*juego));
+    system("clear");
 }   
