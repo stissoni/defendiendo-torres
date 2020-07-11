@@ -364,17 +364,8 @@ void jugar_turno_enanos(juego_t* juego){
             bool enano_ataco = false;
             while(enemigo < (*juego).nivel.tope_enemigos && !enano_ataco){
                 if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    if (enemigo_misma_fila((*juego), defensor, enemigo)){
+                    if (enemigo_misma_fila((*juego), defensor, enemigo) || enemigo_misma_columna((*juego), defensor, enemigo) || enemigo_diagonal((*juego), defensor, enemigo)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                        enano_ataco = true;
-                    }
-                    else if (enemigo_misma_columna((*juego), defensor, enemigo)){
-                        (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                        enano_ataco = true;
-                    }
-                    else if (enemigo_diagonal((*juego), defensor, enemigo)){
-                        (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                        enano_ataco = true;
                     }
                 }   
                 else if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
