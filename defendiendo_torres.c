@@ -206,7 +206,7 @@ bool orco_esta_en_camino(juego_t juego, int enemigo, int camino){
     if (camino == CAMINO_1){
         return (juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO);
     }
-    if (camino == CAMINO_2){
+    else{
         return (juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_2 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO);
     }
 }
