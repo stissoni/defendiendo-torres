@@ -164,16 +164,20 @@ void imprimir_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno,
     }
 }
 
-void cargar_camino(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO],int camino, int i){
+void cargar_camino(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO],int camino){
     if (camino == CAMINO_1){
-        terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
-        terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
-        terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
+        for (int i = 0; i < juego.nivel.tope_camino_1; i++){
+            terreno[juego.nivel.camino_1[i].fil][juego.nivel.camino_1[i].col] = CAMINO;
+            terreno[juego.nivel.camino_1[POSICION_ENTRADA].fil][juego.nivel.camino_1[POSICION_ENTRADA].col] = ENTRADA;
+            terreno[juego.nivel.camino_1[juego.nivel.tope_camino_1-1].fil][juego.nivel.camino_1[juego.nivel.tope_camino_1-1].col] = TORRE;
+        }
     }
     else{
-        terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
-        terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
-        terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
+        for (int i = 0; i < juego.nivel.tope_camino_2; i++){
+            terreno[juego.nivel.camino_2[i].fil][juego.nivel.camino_2[i].col] = CAMINO;
+            terreno[juego.nivel.camino_2[POSICION_ENTRADA].fil][juego.nivel.camino_2[POSICION_ENTRADA].col] = ENTRADA;
+            terreno[juego.nivel.camino_2[juego.nivel.tope_camino_2-1].fil][juego.nivel.camino_2[juego.nivel.tope_camino_2-1].col] = TORRE;
+        }
     }
 }
 
@@ -186,8 +190,10 @@ void cargar_enemigos(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO], int 
     }
 }
 
-void cargar_defensores(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO], int defensor){
-    terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
+void cargar_defensores(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO]){
+    for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
+        terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
+    }
 }
 
 void inicializar_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno, int columnas_terreno){
@@ -203,19 +209,13 @@ void mostrar_juego(juego_t juego){
     int filas_terreno, columnas_terreno;
     cargar_tamanio_terreno(juego, &filas_terreno, &columnas_terreno);
     inicializar_terreno(terreno, filas_terreno,columnas_terreno);
-    if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        for (int i = 0; i < juego.nivel.tope_camino_1; i++){
-            cargar_camino(juego, terreno, CAMINO_1, i);
-        }
+    if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){       
+        cargar_camino(juego, terreno, CAMINO_1);
     }
     if (juego.nivel_actual == NIVEL_2 || juego.nivel_actual == NIVEL_3 || juego.nivel_actual == NIVEL_4){
-        for (int i = 0; i < juego.nivel.tope_camino_2; i++){
-            cargar_camino(juego, terreno, CAMINO_2, i);
-        }
+        cargar_camino(juego, terreno, CAMINO_2);
     }
-    for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
-        cargar_defensores(juego, terreno, defensor);
-    }
+    cargar_defensores(juego, terreno);
     for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
         if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
             cargar_enemigos(juego, terreno, CAMINO_1, enemigo);
