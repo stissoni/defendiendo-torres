@@ -51,7 +51,7 @@ int main(){
     /* ................... JUGAR PARTIDA ................... */
     juego_t juego;
     inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-    for (int nivel = NIVEL_4; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
+    for (int nivel = NIVEL_2; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         inicializar_nivel(&juego, nivel);
         int defensores_extra_colocados = 0;
         while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){

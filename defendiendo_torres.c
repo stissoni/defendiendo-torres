@@ -83,6 +83,9 @@ void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legol
     }
 }
 
+/* Recibe el juego en curso. Imprime la informacion del estado actual del juego.
+ *
+ */
 void mostrar_informacion_juego(juego_t juego){
     printf("\nResistencia torre 1: %i \nResistencia torre 2: %i\n", juego.torres.resistencia_torre_1, juego.torres.resistencia_torre_2);
     printf("Enemigos muertos: %i\n", enemigos_muertos(juego.nivel));
@@ -98,6 +101,9 @@ void mostrar_informacion_juego(juego_t juego){
     printf("\n");
 }
 
+/* Recibe el numero de columnas del terreno e imprime las lineas que lo delimitan.
+ *
+ */
 void imprimir_lineas(int columnas_terreno){
     printf("    ");
     for (int i = 0; i < columnas_terreno; i++){
@@ -106,6 +112,9 @@ void imprimir_lineas(int columnas_terreno){
      printf("\n");
 }
 
+/* Recibe el juego ya inicializado para que, a partir del nivel actual, cargue los parametros del tamanio del terreno de juego.
+ *
+ */
 void cargar_tamanio_terreno(juego_t juego, int* filas_terreno, int* columnas_terreno){
     if (juego.nivel_actual == NIVEL_1 || juego.nivel_actual == NIVEL_2){
         (*filas_terreno) = 15;
@@ -117,6 +126,9 @@ void cargar_tamanio_terreno(juego_t juego, int* filas_terreno, int* columnas_ter
     }
 }
 
+/* A partir de las columnas del juego, imprime los numeros que seran referencia de coordenadas para el jugador.
+ *
+ */
 void imprimir_numeros(int columnas_terreno){
     printf("    ");
     for (int i = 0; i < columnas_terreno; i++){
@@ -130,13 +142,16 @@ void imprimir_numeros(int columnas_terreno){
     printf("\n");
 }
 
+/* Recibe la matriz del terreno ya cargada con los caminos, los defensores y enemigos, etc. La imprime por pantalla.
+ *
+ */
 void imprimir_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno, int columnas_terreno){
     for (int fil = 0; fil < filas_terreno; fil++){
         for (int col = 0; col < columnas_terreno; col++){
             if (col == 0){
                 if (fil == 0){
                     if (terreno[fil][col] == ORCO || terreno[fil][col] == ENANO || terreno[fil][col] == ELFO){
-                        printf(" 0 |   %c ", terreno[fil][col]);
+                        printf(" 0 |  %c ", terreno[fil][col]);
                     }
                     else {
                         printf(" 0 | %c%c ", terreno[fil][col], terreno[fil][col]);
@@ -164,6 +179,9 @@ void imprimir_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno,
     }
 }
 
+/* Recibe el juego, el camino y una matriz del terreno del juego. Carga sobre la matriz del terreno la informacion sobre el camino.
+ *
+ */
 void cargar_camino(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO],int camino){
     if (camino == CAMINO_1){
         for (int i = 0; i < juego.nivel.tope_camino_1; i++){
@@ -181,21 +199,44 @@ void cargar_camino(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO],int cam
     }
 }
 
-void cargar_enemigos(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO], int camino, int enemigo){
+/* Decide si un orco se encuentra en el camino a la torre.
+ *
+ */
+bool orco_esta_en_camino(juego_t juego, int enemigo, int camino){
     if (camino == CAMINO_1){
-        terreno[juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+        return (juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO);
     }
-    else{
-        terreno[juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+    if (camino == CAMINO_2){
+        return (juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_2 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO);
     }
 }
 
+/* Recibe el juego, y una matriz del terreno del juego. Carga sobre la matriz del terreno la informacion sobre los enemigos.
+ *
+ */
+void cargar_enemigos(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO]){
+    for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
+        if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && orco_esta_en_camino(juego, enemigo, CAMINO_1)){
+            terreno[juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_1[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+        }
+        if (juego.nivel.enemigos[enemigo].camino == CAMINO_2 && orco_esta_en_camino(juego, enemigo, CAMINO_2)){
+            terreno[juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].fil][juego.nivel.camino_2[juego.nivel.enemigos[enemigo].pos_en_camino].col] = ORCO;
+        }
+    }
+}
+
+/* Recibe el juego, y una matriz del terreno del juego. Carga sobre la matriz del terreno la informacion sobre los defensores.
+ *
+ */
 void cargar_defensores(juego_t juego, char terreno[MAX_TERRENO][MAX_TERRENO]){
     for (int defensor = 0; defensor < juego.nivel.tope_defensores; defensor++){
         terreno[juego.nivel.defensores[defensor].posicion.fil][juego.nivel.defensores[defensor].posicion.col] = juego.nivel.defensores[defensor].tipo;
     }
 }
 
+/* Recibe una matriz del terreno del juego y los parametros de su tamanio. Inicializa el terreno de juego.
+ *
+ */
 void inicializar_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno, int columnas_terreno){
     for (int fil = 0; fil < filas_terreno; fil++){
         for (int col = 0; col < columnas_terreno; col++){
@@ -216,14 +257,7 @@ void mostrar_juego(juego_t juego){
         cargar_camino(juego, terreno, CAMINO_2);
     }
     cargar_defensores(juego, terreno);
-    for (int enemigo = 0; enemigo < juego.nivel.tope_enemigos; enemigo++){
-        if (juego.nivel.enemigos[enemigo].camino == CAMINO_1 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_1 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-            cargar_enemigos(juego, terreno, CAMINO_1, enemigo);
-        }
-        if (juego.nivel.enemigos[enemigo].camino == CAMINO_2 && juego.nivel.enemigos[enemigo].pos_en_camino >= POSICION_INICIAL_ORCO && juego.nivel.enemigos[enemigo].pos_en_camino < juego.nivel.tope_camino_2 && juego.nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-            cargar_enemigos(juego, terreno, CAMINO_2, enemigo);
-        }
-    }
+    cargar_enemigos(juego, terreno);
     imprimir_numeros(columnas_terreno);
     imprimir_lineas(columnas_terreno);
     imprimir_terreno(terreno, columnas_terreno, filas_terreno);
