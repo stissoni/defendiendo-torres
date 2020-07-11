@@ -341,18 +341,7 @@ int danio_defensor(juego_t juego, int numero_defensor){
         }
     }
 }
-bool enemigo_al_alcance(juego_t juego, int defensor, int enemigo, int camino){
-    if (enemigo_misma_fila(juego,defensor, enemigo, camino)){
-        return true;
-    }
-    else if (enemigo_misma_columna(juego, defensor, enemigo, camino)){
-        return true;
-    }
-    else if (enemigo_diagonal(juego, defensor, enemigo, camino)){
-        return true;
-    }
-    return false;
-}
+
 bool enemigo_misma_fila(juego_t juego, int defensor, int enemigo, int camino){
     if (camino == CAMINO_1){
         return (((juego).nivel.defensores[defensor].posicion.fil == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].fil) && ((juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].col - 1 || (juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].col + 1));
@@ -372,6 +361,19 @@ bool enemigo_diagonal(juego_t juego, int defensor, int enemigo, int camino){
         return ((((juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((juego).nivel.defensores[defensor].posicion.fil == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (juego).nivel.defensores[defensor].posicion.fil == (juego).nivel.camino_1[(juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1));
     }
     return ((((juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_2[(juego).nivel.enemigos[enemigo].pos_en_camino].col + 1) || ((juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_2[(juego).nivel.enemigos[enemigo].pos_en_camino].col - 1)) && ((juego).nivel.defensores[defensor].posicion.fil == (juego).nivel.camino_2[(juego).nivel.enemigos[enemigo].pos_en_camino].fil - 1 || (juego).nivel.defensores[defensor].posicion.col == (juego).nivel.camino_2[(juego).nivel.enemigos[enemigo].pos_en_camino].fil + 1));
+}
+
+bool enemigo_al_alcance(juego_t juego, int defensor, int enemigo, int camino){
+    if (enemigo_misma_fila(juego,defensor, enemigo, camino)){
+        return true;
+    }
+    else if (enemigo_misma_columna(juego, defensor, enemigo, camino)){
+        return true;
+    }
+    else if (enemigo_diagonal(juego, defensor, enemigo, camino)){
+        return true;
+    }
+    return false;
 }
 
 /* Recibe el juego con el nivel ya inicializado. Itera todos los defensores, y para cada defensor busca orcos que esten al alcanze.
