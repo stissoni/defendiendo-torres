@@ -43,7 +43,7 @@
 #define POSICION_INICIAL_ORCO 0
 #define VIDA_ORCO_EXTRA_MAX 100
 #define MAX_TERRENO 100
-
+#define ALCANCE_ELFO 3
 /* Recibe el nivel, itera el vector de orcos.
  * Devuelve el numero de orcos con vida igual o menor a 0.
  */
@@ -399,7 +399,7 @@ bool enemigo_al_alcance(juego_t juego, int defensor, int enemigo){
         return false;
     }
     else {
-        if (distancia_manhattan(juego, defensor, enemigo) <= 3){
+        if (distancia_manhattan(juego, defensor, enemigo) <= ALCANCE_ELFO){
             return true;
         }
         return false;
