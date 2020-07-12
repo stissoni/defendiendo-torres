@@ -43,7 +43,7 @@
 #define POSICION_INICIAL_ORCO 0
 #define VIDA_ORCO_EXTRA_MAX 100
 #define MAX_TERRENO 100
-
+#define ALCANCE_ELFO 3
 /* Recibe el nivel, itera el vector de orcos.
  * Devuelve el numero de orcos con vida igual o menor a 0.
  */
@@ -399,7 +399,7 @@ bool enemigo_al_alcance(juego_t juego, int defensor, int enemigo){
         return false;
     }
     else {
-        if (distancia_manhattan(juego, defensor, enemigo) <= 3){
+        if (distancia_manhattan(juego, defensor, enemigo) <= ALCANCE_ELFO){
             return true;
         }
         return false;
@@ -437,15 +437,11 @@ void jugar_turno_elfos(juego_t* juego){
     for (int defensor = 0; defensor < (*juego).nivel.tope_defensores; defensor++){
         if ((*juego).nivel.defensores[defensor].tipo == ELFO){
             for (int enemigo = 0; enemigo < (*juego).nivel.tope_enemigos; enemigo++){
-                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    if (enemigo_al_alcance((*juego), defensor, enemigo)){
-                        (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                    }
+                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO && enemigo_al_alcance((*juego), defensor, enemigo)){
+                    (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                 }
-                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    if (enemigo_al_alcance((*juego), defensor, enemigo)){
+                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO && enemigo_al_alcance((*juego), defensor, enemigo)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                    }
                 }
             }
         }
