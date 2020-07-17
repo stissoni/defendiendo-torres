@@ -44,6 +44,7 @@
 #define VIDA_ORCO_EXTRA_MAX 100
 #define MAX_TERRENO 100
 #define ALCANCE_ELFO 3
+
 /* Recibe el nivel, itera el vector de orcos.
  * Devuelve el numero de orcos con vida igual o menor a 0.
  */
