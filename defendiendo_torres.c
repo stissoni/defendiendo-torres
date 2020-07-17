@@ -438,15 +438,11 @@ void jugar_turno_elfos(juego_t* juego){
     for (int defensor = 0; defensor < (*juego).nivel.tope_defensores; defensor++){
         if ((*juego).nivel.defensores[defensor].tipo == ELFO){
             for (int enemigo = 0; enemigo < (*juego).nivel.tope_enemigos; enemigo++){
-                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    if (enemigo_al_alcance((*juego), defensor, enemigo)){
-                        (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                    }
+                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_1 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO && enemigo_al_alcance((*juego), defensor, enemigo)){
+                    (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
                 }
-                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO){
-                    if (enemigo_al_alcance((*juego), defensor, enemigo)){
+                if ((*juego).nivel.enemigos[enemigo].camino == CAMINO_2 && (*juego).nivel.enemigos[enemigo].vida > VIDA_ORCO_MUERTO && enemigo_al_alcance((*juego), defensor, enemigo)){
                         (*juego).nivel.enemigos[enemigo].vida -= danio_defensor((*juego), defensor);
-                    }
                 }
             }
         }
