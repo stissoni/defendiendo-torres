@@ -34,7 +34,7 @@ char valor_animo(int valor_animo);
 
 
 void animos(int* viento, int* humedad , char* animo_legolas , char* animo_gimli){
-    printf("\nBienvenidos al Abismo de Helm!\n\n");
+    printf("Bienvenidos al Abismo de Helm!\n\n");
     int dia_mes;
     recibir_dia_mes(&dia_mes);
     char hora_dia;

@@ -3,9 +3,11 @@
 #include <stdio_ext.h>
 #include <stdbool.h>
 #include <time.h>
+#include <string.h>
 #include "animos.h"
 #include "defendiendo_torres.h"
 #include "utiles.h"
+#include "comandos.h"
 
 #define BUENO 'B'
 #define REGULAR 'R'
@@ -42,30 +44,45 @@ void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
 void imprimir_resultado(int estado_juego);
 
-int main(){
-    srand((unsigned)time(NULL));
-    /* ................... CONDICIONES INICIALES ................... */
-    int viento, humedad;
-    char animo_legolas, animo_gimli;
-    animos(&viento, &humedad , &animo_legolas , &animo_gimli);
-    /* ................... JUGAR PARTIDA ................... */
-    juego_t juego;
-    inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-    for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
-        inicializar_nivel(&juego, nivel);
-        int defensores_extra_colocados = 0;
-        while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
-            system("clear");
-            jugar_turno(&juego);
-            mostrar_juego(juego);
-            if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
-                pedir_defensor_extra(&juego,&defensores_extra_colocados);
-            }
-            detener_el_tiempo(0.2);
-        }     
+int main(int argc , char *argv[]){
+    system("clear");
+    if (strcmp(argv[1], RANKING) == 0){
+        ejecutar_comando_ranking(argc,argv);
     }
-    /* ................... RESULTADO FINAL ................... */
-    imprimir_resultado(estado_juego(juego));
+    if (strcmp(argv[1], CREAR_CAMINO) == 0){
+        ejecutar_comando_crear_camino(argc,argv);
+    }
+    if (strcmp(argv[1], CREAR_CONFIGURACION) == 0){
+        ejecutar_comando_crear_configuracion(argc,argv);
+    }
+    if (strcmp(argv[1], PONEME_LA_REPE) == 0){
+        ejecutar_comando_poneme_la_repe(argc,argv);
+    }
+    if (strcmp(argv[1], JUGAR) == 0){    
+        srand((unsigned)time(NULL));
+        /* ................... CONDICIONES INICIALES ................... */
+        int viento, humedad;
+        char animo_legolas, animo_gimli;
+        animos(&viento, &humedad , &animo_legolas , &animo_gimli);
+        /* ................... JUGAR PARTIDA ................... */
+        juego_t juego;
+        inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
+        for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
+            inicializar_nivel(&juego, nivel);
+            int defensores_extra_colocados = 0;
+            while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
+                system("clear");
+                jugar_turno(&juego);
+                mostrar_juego(juego);
+                if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
+                    pedir_defensor_extra(&juego,&defensores_extra_colocados);
+                }
+                detener_el_tiempo(0.2);
+            }     
+        }
+        /* ................... RESULTADO FINAL ................... */
+        imprimir_resultado(estado_juego(juego));
+    }
     return 0;
 }
 
