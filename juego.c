@@ -33,16 +33,14 @@
 #define ENEMIGOS_NIVEL_2 200
 #define ENEMIGOS_NIVEL_3 300
 #define ENEMIGOS_NIVEL_4 500
-#define DEFENSORES_NIVEL_1 5
-#define DEFENSORES_NIVEL_2 5
-#define DEFENSORES_NIVEL_3 6
-#define DEFENSORES_NIVEL_4 8
 
-void inicializar_nivel(juego_t* juego, int nivel);
+
+void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion, FILE* archivo_caminos);
 void colocar_defensor(juego_t* juego, char tipo_defensor);
-void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados);
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados, configuracion_t configuracion);
 bool se_puede_agregar_defensor_extra(juego_t juego, int defensores_extra_colocados);
 void imprimir_resultado(int estado_juego);
+void jugar_partida(int argc, char* argv[]);
 
 int main(int argc , char *argv[]){
     system("clear");
@@ -59,31 +57,74 @@ int main(int argc , char *argv[]){
         ejecutar_comando_poneme_la_repe(argc,argv);
     }
     if (strcmp(argv[1], JUGAR) == 0){    
-        srand((unsigned)time(NULL));
-        /* ................... CONDICIONES INICIALES ................... */
-        int viento, humedad;
-        char animo_legolas, animo_gimli;
-        animos(&viento, &humedad , &animo_legolas , &animo_gimli);
-        /* ................... JUGAR PARTIDA ................... */
-        juego_t juego;
-        inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli);
-        for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
-            inicializar_nivel(&juego, nivel);
-            int defensores_extra_colocados = 0;
-            while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
-                system("clear");
-                jugar_turno(&juego);
-                mostrar_juego(juego);
-                if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
-                    pedir_defensor_extra(&juego,&defensores_extra_colocados);
-                }
-                detener_el_tiempo(0.2);
-            }     
-        }
-        /* ................... RESULTADO FINAL ................... */
-        imprimir_resultado(estado_juego(juego));
+        jugar_partida(argc,argv);
     }
     return 0;
+}
+
+void jugar_partida(int argc, char* argv[]){
+    char nombre_archivo_configuracion[MAX_NOMBRE];
+    char nombre_archivo_grabacion[MAX_NOMBRE];
+    configuracion_t configuracion;
+    bool se_cargo_configuracion = false;
+    for (int j = 2; j < argc; j++){
+        if(strncmp(argv[j], GRABACION, strlen(GRABACION)) == 0){
+            char* token = strtok(argv[j], "=");
+            strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
+        }
+        if (strncmp(argv[j], CONFIG, strlen(CONFIG)) == 0){
+            char* token = strtok(argv[j], "=");
+            strcpy(nombre_archivo_configuracion, strtok(NULL, "="));
+            se_cargo_configuracion = obtener_configuracion(nombre_archivo_configuracion, &configuracion);
+        }
+    }
+    srand((unsigned)time(NULL));
+    /* ................... CONDICIONES INICIALES ................... */
+    FILE* archivo_caminos;
+    bool se_abrio_archivo_caminos;
+    if (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) != 0){
+        archivo_caminos = fopen(configuracion.archivo_caminos, "r");
+        if (!archivo_caminos){
+            printf("El archivo de caminos no existe\n");
+            return;
+        }
+        else {
+            se_abrio_archivo_caminos = true;
+        }
+    }
+    int viento, humedad;
+    char animo_legolas, animo_gimli;
+    animos(&viento, &humedad , &animo_legolas , &animo_gimli, configuracion);
+    int numero_enemigos_muertos = 0;
+    int numero_de_defensores = 0;
+    char nombre_jugador[MAX_NOMBRE];
+    printf("Ingresa tu usuario por favor: ");
+    scanf("%s", nombre_jugador);
+    /* ................... JUGAR PARTIDA ................... */
+    juego_t juego;
+    inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli, configuracion);
+    for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
+        inicializar_nivel(&juego, nivel, configuracion, archivo_caminos);
+        numero_de_defensores = numero_de_defensores + (juego.nivel.tope_defensores);
+        int defensores_extra_colocados = 0;
+        while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
+            system("clear");
+            jugar_turno(&juego);
+            mostrar_juego(juego);
+            if (se_puede_agregar_defensor_extra(juego, defensores_extra_colocados)){
+                pedir_defensor_extra(&juego, &defensores_extra_colocados,configuracion);
+            }
+            detener_el_tiempo(configuracion.velocidad);
+        }     
+        numero_enemigos_muertos = numero_enemigos_muertos + enemigos_muertos(juego.nivel);
+    }
+    /* ................... RESULTADO FINAL ................... */
+    if (se_abrio_archivo_caminos){
+        fclose(archivo_caminos);
+    }
+    int puntaje;
+    obtener_puntaje(configuracion, numero_enemigos_muertos, &puntaje, nombre_jugador, nombre_archivo_configuracion);
+    imprimir_resultado(estado_juego(juego));
 }
 
 /* Recibe el estado del juego, imprime el resultado del jugador.
@@ -151,11 +192,11 @@ bool defensor_dentro_terreno(juego_t juego, int fil, int col){
 /* Recibe el juego, y el tipo de defensor extra que se quiere colocar.
  * Devuelve si es posible colocar el defensor extra en funcion de la resistencia de la torre.
  */
-bool torres_resistencia_suficiente(juego_t juego, char tipo_defensor){
-    if (tipo_defensor == ENANO && juego.torres.resistencia_torre_1 - DANIO_DEFENSOR_EXTRA > 0){
+bool torres_resistencia_suficiente(juego_t juego, char tipo_defensor, configuracion_t configuracion){
+    if (tipo_defensor == ENANO && juego.torres.resistencia_torre_1 - configuracion.enanos_extra[1] > 0 && juego.torres.resistencia_torre_2 - configuracion.enanos_extra[2] > 0){
         return true;
     }
-    if (tipo_defensor == ELFO && juego.torres.resistencia_torre_2 - DANIO_DEFENSOR_EXTRA > 0){
+    if (tipo_defensor == ELFO && juego.torres.resistencia_torre_1 - configuracion.elfos_extra[1] > 0 && juego.torres.resistencia_torre_2 - configuracion.elfos_extra[2] > 0){
         return true;
     }
     return false;
@@ -164,7 +205,7 @@ bool torres_resistencia_suficiente(juego_t juego, char tipo_defensor){
 /* Recibe el juego y el numero de llamados a esta funcion.
  * Interactua con el usuario, verificando si quiere colocar un defensor, y de que tipo desea. Si todo es correcto, llama a la funcion que coloca el defensor.
  */
-void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
+void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados, configuracion_t configuracion){
     char respuesta, tipo_defensor;
     printf("Deseas agregar defensor? (S/n): ");
     __fpurge(stdin);
@@ -173,13 +214,15 @@ void pedir_defensor_extra(juego_t* juego, int* defensores_extra_colocados){
         printf("Que tipo de defensor desea agregar? (G/L): ");
         __fpurge(stdin);
         scanf("%c", &tipo_defensor);
-        if (torres_resistencia_suficiente((*juego), tipo_defensor)){
+        if (torres_resistencia_suficiente((*juego), tipo_defensor, configuracion)){
             colocar_defensor(juego, tipo_defensor);
             if (tipo_defensor == ENANO){
-                (*juego).torres.resistencia_torre_1 -= DANIO_DEFENSOR_EXTRA;
+                (*juego).torres.resistencia_torre_1 -= configuracion.enanos_extra[1];
+                (*juego).torres.resistencia_torre_2 -= configuracion.enanos_extra[2];
             }
             else {
-                (*juego).torres.resistencia_torre_2 -= DANIO_DEFENSOR_EXTRA;
+                (*juego).torres.resistencia_torre_1 -= configuracion.elfos_extra[1];
+                (*juego).torres.resistencia_torre_2 -= configuracion.elfos_extra[2];
             }
         }
         else {
@@ -273,9 +316,11 @@ bool es_par(int numero){
 /* Recibe el juego, y el nivel actual.
  * Inicializa en nivel, con los caminos, y posiciona los defensores.
  */
-void inicializar_nivel(juego_t* juego, int nivel){
+void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion, FILE* archivo_caminos){
     system("clear");
-    int numero_defensores;
+    bool camino_por_defecto = (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) == 0);
+    int numero_defensores_enanos;
+    int numero_defensores_elfos;
     char tipo_defensor;
     coordenada_t entrada, torre;
     (*juego).nivel_actual = nivel;
@@ -285,47 +330,60 @@ void inicializar_nivel(juego_t* juego, int nivel){
     (*juego).nivel.tope_camino_2 = 0;
     if (nivel == NIVEL_1){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
-        printf("NIVEL 1\n\n");
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        numero_defensores = DEFENSORES_NIVEL_1;
-        tipo_defensor = ENANO;
+        printf("NIVEL 1\n\n");  
+        if (camino_por_defecto){
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
+        }
+        numero_defensores_enanos = configuracion.enanos_iniciales[0];
+        numero_defensores_elfos = configuracion.elfos_iniciales[0];
     }
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
         printf("NIVEL 2\n\n");
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        numero_defensores = DEFENSORES_NIVEL_2;
-        tipo_defensor = ELFO;
+        if (camino_por_defecto){
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
+        }
+        numero_defensores_enanos = configuracion.enanos_iniciales[1];
+        numero_defensores_elfos = configuracion.elfos_iniciales[1];
     }
     else if (nivel == NIVEL_3){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
         printf("NIVEL 3\n\n");
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        numero_defensores = DEFENSORES_NIVEL_3;
+        if (camino_por_defecto){
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
+        }
+        numero_defensores_enanos = configuracion.enanos_iniciales[2];
+        numero_defensores_elfos = configuracion.elfos_iniciales[2];
     }
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
         printf("NIVEL 4\n\n");
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
-        inicializar_entradas_torres(juego, &entrada, &torre);
-        obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
-        numero_defensores = DEFENSORES_NIVEL_4;
+        if (camino_por_defecto){
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
+            inicializar_entradas_torres(juego, &entrada, &torre);
+            obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
+        }
+        numero_defensores_enanos = configuracion.enanos_iniciales[3];
+        numero_defensores_elfos = configuracion.elfos_iniciales[3];
+    }
+    if (!camino_por_defecto){
+        printf("Obteniendo camino del nivel...\n\n");
+        detener_el_tiempo(2);
+        obtener_camino_creado(archivo_caminos, (*juego).nivel.camino_1, (*juego).nivel.camino_2, &(*juego).nivel.tope_camino_1, &(*juego).nivel.tope_camino_2);
     }
     mostrar_juego(*juego);
-    for (int defensor = 0; defensor < numero_defensores; defensor++){
-        if (nivel == NIVEL_3 || nivel == NIVEL_4){
-            if (es_par(defensor)){
-                tipo_defensor = ENANO;
-            }
-            else {
-                tipo_defensor = ELFO;
-            }
+    for (int defensor = 0; defensor < (numero_defensores_enanos+numero_defensores_elfos); defensor++){
+        if (defensor < numero_defensores_enanos){
+            tipo_defensor = ENANO;
+        }
+        else {
+            tipo_defensor = ELFO;
         }
         colocar_defensor(juego, tipo_defensor);
     }

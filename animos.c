@@ -2,6 +2,8 @@
 #include <stdio_ext.h>
 #include <stdbool.h>
 
+#include "comandos.h"
+
 const int DIA_MIN = 1;
 const int DIA_MAX = 30;
 const char PIE_IZQUIERDO = 'I';
@@ -33,29 +35,34 @@ int valor_porcentaje_humedad(char hora_dia);
 char valor_animo(int valor_animo);
 
 
-void animos(int* viento, int* humedad , char* animo_legolas , char* animo_gimli){
+void animos(int* viento, int* humedad , char* animo_legolas , char* animo_gimli, configuracion_t configuracion){
     printf("Bienvenidos al Abismo de Helm!\n\n");
     int dia_mes;
-    recibir_dia_mes(&dia_mes);
+    if (configuracion.animo_elfos[0] == POR_DEFECTO){
+        recibir_dia_mes(&dia_mes);
+        *viento = valor_velocidad_viento(dia_mes);
+    }
     char hora_dia;
-    recibir_hora_dia(&hora_dia);
-
+    if (configuracion.animo_enanos[0] == POR_DEFECTO){
+        recibir_hora_dia(&hora_dia);
+        *humedad = valor_porcentaje_humedad(hora_dia);
+    }
     char pie, cena;
     int horas_suenio;
-    printf("\nVeamos el animo de vuestros lideres, primero el de Legolas:\n");
-    int valor_animo_legolas;
-    recibir_pie_cena_suenio(&pie,&cena,&horas_suenio);
-    calcular_animo(&valor_animo_legolas, pie, cena, horas_suenio);
-    
-    printf("\nAhora el animo de Gimli!:\n");
     int valor_animo_gimli;
-    recibir_pie_cena_suenio(&pie, &cena, &horas_suenio);
-    calcular_animo(&valor_animo_gimli, pie, cena, horas_suenio);
-
-    *viento = valor_velocidad_viento(dia_mes);
-    *humedad = valor_porcentaje_humedad(hora_dia);
-    *animo_legolas = valor_animo(valor_animo_legolas);
-    *animo_gimli = valor_animo(valor_animo_gimli);
+    int valor_animo_legolas;
+    if (configuracion.animo_elfos[1] == POR_DEFECTO){
+        printf("\nVeamos el animo de vuestros lideres, primero el de Legolas:\n");
+        recibir_pie_cena_suenio(&pie,&cena,&horas_suenio);
+        calcular_animo(&valor_animo_legolas, pie, cena, horas_suenio);
+        *animo_legolas = valor_animo(valor_animo_legolas);
+    }
+    if (configuracion.animo_enanos[1] == POR_DEFECTO){
+        printf("\nAhora el animo de Gimli!:\n");
+        recibir_pie_cena_suenio(&pie, &cena, &horas_suenio);
+        calcular_animo(&valor_animo_gimli, pie, cena, horas_suenio);
+        *animo_gimli = valor_animo(valor_animo_gimli);
+    }
 }
 
 void recibir_dia_mes(int* dia){

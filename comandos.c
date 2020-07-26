@@ -4,6 +4,186 @@
 
 #include "comandos.h"
 #include "defendiendo_torres.h"
+#include "utiles.h"
+
+void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
+    char nombre_archivo_ranking[MAX_NOMBRE];
+    if (strcmp(nombre_archivo_configuracion, "-1") == 0){
+        strcpy(nombre_archivo_ranking, "ranking.csv");
+    }
+    else {
+        strcpy(nombre_archivo_ranking, "ranking_");
+        strcat(nombre_archivo_ranking,strtok(nombre_archivo_configuracion, "."));
+        strcat(nombre_archivo_ranking, ".csv");
+    }
+    FILE* archivo_ranking = fopen(nombre_archivo_ranking, "r");
+    if (!archivo_ranking){
+		printf("El archivo de ranking no existe, creando uno nuevo...\n");
+	}
+    FILE* archivo_ranking_actualizado = fopen("archivo_ranking_actualizado.csv", "w");
+    if (!archivo_ranking_actualizado){
+        fclose(archivo_ranking);
+		printf("El archivo de ranking no pudo ser creado.\n");
+		return;
+	}
+    int puntaje_archivo;
+    char nombre_jugador_archivo[MAX_NOMBRE];
+    if (archivo_ranking){
+        bool se_guardo_puntaje_nuevo = false;
+        int leidos = fscanf(archivo_ranking, "%[^;];%i\n", nombre_jugador_archivo, &puntaje_archivo);
+        while (leidos == 2){
+            if (puntaje > puntaje_archivo && !se_guardo_puntaje_nuevo){
+                fprintf(archivo_ranking_actualizado, "%s;%i\n", nombre_jugador, puntaje);
+                se_guardo_puntaje_nuevo = true;
+            }
+            if (puntaje == puntaje_archivo && !se_guardo_puntaje_nuevo){
+                if (strcmp(nombre_jugador, nombre_jugador_archivo) > 0){
+                    fprintf(archivo_ranking_actualizado, "%s;%i\n", nombre_jugador, puntaje);
+                    se_guardo_puntaje_nuevo = true;
+                }
+            }
+            fprintf(archivo_ranking_actualizado, "%s;%i\n", nombre_jugador_archivo, puntaje_archivo);
+            leidos = fscanf(archivo_ranking, "%[^;];%i\n", nombre_jugador_archivo, &puntaje_archivo);
+        }
+    }
+    else{
+        fprintf(archivo_ranking_actualizado, "%s;%i\n", nombre_jugador, puntaje);
+    }
+    if (archivo_ranking){
+        fclose(archivo_ranking);
+    }
+    fclose(archivo_ranking_actualizado);
+    rename("archivo_ranking_actualizado.csv", nombre_archivo_ranking);
+}
+
+void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
+    int numero_defensores = 0;
+    for (int i = 0; i < 4; i++){
+        numero_defensores += configuracion.enanos_iniciales[i];
+        numero_defensores += configuracion.elfos_iniciales[i];
+    }
+    (*puntaje) = (enemigos_muertos*1000) / ((configuracion.resistencia_torres[0]) + (configuracion.resistencia_torres[1]) + (numero_defensores) + (configuracion.elfos_extra[0]) + (configuracion.enanos_extra[0]));
+    printf("%s tu puntaje fue de %i. Guardando puntaje...\n", nombre_jugador, (*puntaje));
+    guardar_puntaje((*puntaje), nombre_jugador, nombre_archivo_configuracion);
+    detener_el_tiempo(4);
+}
+
+void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONGITUD_CAMINO],coordenada_t camino_2[MAX_LONGITUD_CAMINO], int* tope_camino_1, int* tope_camino_2){
+    int nivel;
+    int numero_camino;
+    int i;
+    fscanf(archivo_caminos, "NIVEL=%i\n", &nivel);
+    if (nivel == 1){
+        fscanf(archivo_caminos, "CAMINO=%i\n", &numero_camino);
+        int leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_1[0].fil, &camino_1[0].col);
+        i = 0;
+        while (leidos == 2){
+            i++;
+            leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_1[i].fil, &camino_1[i].col);
+            (*tope_camino_1)++;
+        }
+        return;
+    }
+    if (nivel == 2){
+        fscanf(archivo_caminos, "CAMINO=%i\n", &numero_camino);
+        int leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_2[0].fil, &camino_2[0].col);
+        i = 0;
+        while (leidos == 2){
+            i++;
+            leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_2[i].fil, &camino_2[i].col);
+            (*tope_camino_2)++;
+        }
+        return;
+    }
+    if (nivel == 3 || nivel == 4){
+        fscanf(archivo_caminos, "CAMINO=%i\n", &numero_camino);
+        int leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_1[0].fil, &camino_1[0].col);
+        i = 0;
+        while (leidos == 2){
+            i++;
+            leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_1[i].fil, &camino_1[i].col);
+            (*tope_camino_1)++;
+        }
+        fscanf(archivo_caminos, "CAMINO=%i\n", &numero_camino);
+        leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_2[0].fil, &camino_2[0].col);
+        i = 0;
+        while (leidos == 2){
+            i++;
+            leidos = fscanf(archivo_caminos, "%i;%i\n", &camino_2[i].fil, &camino_2[i].col);
+            (*tope_camino_2)++;
+        }
+        return;
+    }
+}
+
+bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], configuracion_t* configuracion){
+    FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, "r");
+	if (!archivo_configuracion){
+		printf("El archivo de configuracion no existe\n");
+		return false;
+	}
+    fscanf(archivo_configuracion, "RESISTENCIA_TORRES=%i,%i\n", &(*configuracion).resistencia_torres[0], &(*configuracion).resistencia_torres[1]);
+    fscanf(archivo_configuracion, "ENANOS_INICIO=%i,%i,%i,%i\n", &(*configuracion).enanos_iniciales[0], &(*configuracion).enanos_iniciales[1], &(*configuracion).enanos_iniciales[2],&(*configuracion).enanos_iniciales[3]);
+    fscanf(archivo_configuracion, "ELFOS_INICIO=%i,%i,%i,%i\n", &(*configuracion).elfos_iniciales[0], &(*configuracion).elfos_iniciales[1], &(*configuracion).elfos_iniciales[2],&(*configuracion).elfos_iniciales[3]);
+    fscanf(archivo_configuracion, "ENANOS_EXTRA=%i,%i,%i\n", &(*configuracion).enanos_extra[0], &(*configuracion).enanos_extra[1], &(*configuracion).enanos_extra[2]);
+    fscanf(archivo_configuracion, "ELFOS_EXTRA=%i,%i,%i\n", &(*configuracion).elfos_extra[0], &(*configuracion).elfos_extra[1], &(*configuracion).elfos_extra[2]);
+    fscanf(archivo_configuracion, "ENANOS_ANIMO=%i,%i\n", &(*configuracion).animo_enanos[0], &(*configuracion).animo_enanos[1]); 
+    fscanf(archivo_configuracion, "ELFOS_ANIMO=%i,%i\n", &(*configuracion).animo_elfos[0], &(*configuracion).animo_elfos[1]);
+    fscanf(archivo_configuracion, "VELOCIDAD=%f\n", &(*configuracion).velocidad);
+    fscanf(archivo_configuracion, "CAMINOS=%s\n", (*configuracion).archivo_caminos);
+    if ((*configuracion).resistencia_torres[0] == POR_DEFECTO){
+        (*configuracion).resistencia_torres[0] = 600;
+    }
+    if ((*configuracion).resistencia_torres[1] == POR_DEFECTO){
+        (*configuracion).resistencia_torres[1] = 600;
+    }
+    if ((*configuracion).elfos_extra[0] == POR_DEFECTO){
+        (*configuracion).elfos_extra[0] = DEFENSORES_EXTRA;
+    }
+    if ((*configuracion).enanos_extra[0] == POR_DEFECTO){
+        (*configuracion).enanos_extra[0] = DEFENSORES_EXTRA;
+    }
+    if ((*configuracion).elfos_extra[1] == POR_DEFECTO){
+        (*configuracion).elfos_extra[1] == 0;
+    }
+    if ((*configuracion).enanos_extra[1] == POR_DEFECTO){
+        (*configuracion).enanos_extra[1] = DANIO_DEFENSOR_EXTRA;
+    }
+    if ((*configuracion).elfos_extra[2] == POR_DEFECTO){
+        (*configuracion).elfos_extra[2] == DANIO_DEFENSOR_EXTRA;
+    }
+    if ((*configuracion).enanos_extra[2] == POR_DEFECTO){
+        (*configuracion).enanos_extra[2] = 0;
+    }
+    if ((*configuracion).enanos_iniciales[0] == POR_DEFECTO){
+        (*configuracion).enanos_iniciales[0] == DEFENSORES_NIVEL_1;
+    }
+    if ((*configuracion).enanos_iniciales[1] == POR_DEFECTO){
+        (*configuracion).enanos_iniciales[1] == 0;
+    }
+    if ((*configuracion).enanos_iniciales[2] == POR_DEFECTO){
+        (*configuracion).enanos_iniciales[2] == DEFENSORES_NIVEL_3 / 2;
+    }
+    if ((*configuracion).enanos_iniciales[3] == POR_DEFECTO){
+        (*configuracion).enanos_iniciales[3] == DEFENSORES_NIVEL_4 / 2;
+    }
+    if ((*configuracion).elfos_iniciales[0] == POR_DEFECTO){
+        (*configuracion).elfos_iniciales[0] == 0;
+    }
+    if ((*configuracion).elfos_iniciales[1] == POR_DEFECTO){
+        (*configuracion).elfos_iniciales[1] == DEFENSORES_NIVEL_2;
+    }
+    if ((*configuracion).elfos_iniciales[2] == POR_DEFECTO){
+        (*configuracion).elfos_iniciales[2] == DEFENSORES_NIVEL_3 / 2;
+    }
+    if ((*configuracion).elfos_iniciales[3] == POR_DEFECTO){
+        (*configuracion).elfos_iniciales[3] == DEFENSORES_NIVEL_4 / 2;
+    }
+    if ((*configuracion).velocidad == POR_DEFECTO){
+        (*configuracion).velocidad = VELOCIDAD_POR_DEFECTO;
+    }
+    return true;
+}
 
 void crear_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE]){
     FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, "w");
