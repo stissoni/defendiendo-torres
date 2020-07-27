@@ -32,10 +32,12 @@ void ejecutar_comando_poneme_la_repe(int argc, char* argv[]);
 void ejecutar_comando_crear_configuracion(int argc, char* argv[]);
 void ejecutar_comando_crear_camino(int argc, char* argv[]);
 void ejecutar_comando_ranking(int argc, char* argv[]);
+void ejecutar_comando_poneme_la_repe(int argc, char* argv[]);
 bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], configuracion_t* configuracion);
 void cargar_configuracion_por_defecto(configuracion_t* configuracion);
 void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONGITUD_CAMINO],coordenada_t camino_2[MAX_LONGITUD_CAMINO], int* tope_camino_1, int* tope_camino_2);
 void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]);
+void grabar_partida(juego_t juego, FILE* archivo_grabacion);
 
 // Defendiendo torres
 

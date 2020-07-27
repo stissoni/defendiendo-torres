@@ -67,10 +67,19 @@ void jugar_partida(int argc, char* argv[]){
     char nombre_archivo_grabacion[MAX_NOMBRE];
     configuracion_t configuracion;
     bool se_cargo_configuracion = false;
+    bool se_graba_partida = false;
+    FILE* archivo_grabacion;
     for (int j = 2; j < argc; j++){
-        if(strncmp(argv[j], GRABACION, strlen(GRABACION)) == 0){
+        if (strncmp(argv[j], GRABACION, strlen(GRABACION)) == 0){
             char* token = strtok(argv[j], "=");
             strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
+            archivo_grabacion = fopen(nombre_archivo_grabacion, "w");
+            if (!archivo_grabacion){
+                printf("No se podra grabar la partida\n");
+            }
+            else {
+                se_graba_partida = true;
+            }
         }
         if (strncmp(argv[j], CONFIG, strlen(CONFIG)) == 0){
             char* token = strtok(argv[j], "=");
@@ -78,11 +87,10 @@ void jugar_partida(int argc, char* argv[]){
             se_cargo_configuracion = obtener_configuracion(nombre_archivo_configuracion, &configuracion);
         }
     }
-    srand((unsigned)time(NULL));
     /* ................... CONDICIONES INICIALES ................... */
     FILE* archivo_caminos;
     bool se_abrio_archivo_caminos;
-    if (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) != 0){
+    if (se_cargo_configuracion){
         archivo_caminos = fopen(configuracion.archivo_caminos, "r");
         if (!archivo_caminos){
             printf("El archivo de caminos no existe\n");
@@ -92,6 +100,11 @@ void jugar_partida(int argc, char* argv[]){
             se_abrio_archivo_caminos = true;
         }
     }
+    if (!se_cargo_configuracion){
+        cargar_configuracion_por_defecto(&configuracion);
+        strcpy(nombre_archivo_configuracion, "-1");
+    }
+    srand((unsigned)time(NULL));
     int viento, humedad;
     char animo_legolas, animo_gimli;
     animos(&viento, &humedad , &animo_legolas , &animo_gimli, configuracion);
@@ -115,12 +128,18 @@ void jugar_partida(int argc, char* argv[]){
                 pedir_defensor_extra(&juego, &defensores_extra_colocados,configuracion);
             }
             detener_el_tiempo(configuracion.velocidad);
+            if (se_graba_partida){
+                grabar_partida(juego, archivo_grabacion);
+            }
         }     
         numero_enemigos_muertos = numero_enemigos_muertos + enemigos_muertos(juego.nivel);
     }
     /* ................... RESULTADO FINAL ................... */
     if (se_abrio_archivo_caminos){
         fclose(archivo_caminos);
+    }
+    if(se_graba_partida){
+        fclose(archivo_grabacion);
     }
     int puntaje;
     obtener_puntaje(configuracion, numero_enemigos_muertos, &puntaje, nombre_jugador, nombre_archivo_configuracion);
@@ -131,7 +150,6 @@ void jugar_partida(int argc, char* argv[]){
  *
  */
 void imprimir_resultado(int estado_juego){
-    system("clear");
     if (estado_juego == JUEGO_PERDIDO){
         printf("PERDISTE :(\n\n");
     }
