@@ -5,6 +5,7 @@
 
 #define POR_DEFECTO -1
 #define CAMINO_POR_DEFECTO "-1"
+#define CONFIGURACION_POR_DEFECTO "-1"
 #define MAX_TERRENO 100
 #define MOSTRAR_TODOS 999999
 #define ARRIBA 'w'
@@ -27,6 +28,8 @@
 #define DEFENSORES_EXTRA 10
 #define DANIO_DEFENSOR_EXTRA 50
 #define VELOCIDAD_POR_DEFECTO 0.2
+#define LECTURA "r"
+#define ESCRITURA "w"
 
 void ejecutar_comando_poneme_la_repe(int argc, char* argv[]);
 void ejecutar_comando_crear_configuracion(int argc, char* argv[]);

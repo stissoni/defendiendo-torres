@@ -9,9 +9,7 @@
 #include "utiles.h"
 #include "comandos.h"
 
-#define BUENO 'B'
-#define REGULAR 'R'
-#define MALO 'M'
+
 #define RESPUESTA_AFIRMATIVA 'S'
 #define ENANO 'G'
 #define ELFO 'L'
@@ -62,6 +60,13 @@ int main(int argc , char *argv[]){
     return 0;
 }
 
+bool camino_por_defecto(configuracion_t configuracion){
+    if (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) == 0){
+        return true;
+    }
+    return false;
+}
+
 void jugar_partida(int argc, char* argv[]){
     char nombre_archivo_configuracion[MAX_NOMBRE];
     char nombre_archivo_grabacion[MAX_NOMBRE];
@@ -73,7 +78,7 @@ void jugar_partida(int argc, char* argv[]){
         if (strncmp(argv[j], GRABACION, strlen(GRABACION)) == 0){
             char* token = strtok(argv[j], "=");
             strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
-            archivo_grabacion = fopen(nombre_archivo_grabacion, "w");
+            archivo_grabacion = fopen(nombre_archivo_grabacion, ESCRITURA);
             if (!archivo_grabacion){
                 printf("No se podra grabar la partida\n");
             }
@@ -90,8 +95,8 @@ void jugar_partida(int argc, char* argv[]){
     /* ................... CONDICIONES INICIALES ................... */
     FILE* archivo_caminos;
     bool se_abrio_archivo_caminos;
-    if (se_cargo_configuracion){
-        archivo_caminos = fopen(configuracion.archivo_caminos, "r");
+    if (se_cargo_configuracion && !camino_por_defecto(configuracion)){
+        archivo_caminos = fopen(configuracion.archivo_caminos, LECTURA);
         if (!archivo_caminos){
             printf("El archivo de caminos no existe\n");
             return;
@@ -102,23 +107,22 @@ void jugar_partida(int argc, char* argv[]){
     }
     if (!se_cargo_configuracion){
         cargar_configuracion_por_defecto(&configuracion);
-        strcpy(nombre_archivo_configuracion, "-1");
+        strcpy(nombre_archivo_configuracion, CONFIGURACION_POR_DEFECTO);
     }
     srand((unsigned)time(NULL));
     int viento, humedad;
     char animo_legolas, animo_gimli;
     animos(&viento, &humedad , &animo_legolas , &animo_gimli, configuracion);
     int numero_enemigos_muertos = 0;
-    int numero_de_defensores = 0;
     char nombre_jugador[MAX_NOMBRE];
     printf("Ingresa tu usuario por favor: ");
     scanf("%s", nombre_jugador);
+    int puntaje;
     /* ................... JUGAR PARTIDA ................... */
     juego_t juego;
     inicializar_juego(&juego, viento, humedad, animo_legolas, animo_gimli, configuracion);
     for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         inicializar_nivel(&juego, nivel, configuracion, archivo_caminos);
-        numero_de_defensores = numero_de_defensores + (juego.nivel.tope_defensores);
         int defensores_extra_colocados = 0;
         while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
             system("clear");
@@ -141,7 +145,6 @@ void jugar_partida(int argc, char* argv[]){
     if(se_graba_partida){
         fclose(archivo_grabacion);
     }
-    int puntaje;
     obtener_puntaje(configuracion, numero_enemigos_muertos, &puntaje, nombre_jugador, nombre_archivo_configuracion);
     imprimir_resultado(estado_juego(juego));
 }
@@ -336,7 +339,6 @@ bool es_par(int numero){
  */
 void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion, FILE* archivo_caminos){
     system("clear");
-    bool camino_por_defecto = (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) == 0);
     int numero_defensores_enanos;
     int numero_defensores_elfos;
     char tipo_defensor;
@@ -349,7 +351,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
     if (nivel == NIVEL_1){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_1;
         printf("NIVEL 1\n\n");  
-        if (camino_por_defecto){
+        if (camino_por_defecto(configuracion)){
             inicializar_entradas_torres(juego, &entrada, &torre);
             obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
         }
@@ -359,7 +361,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
     else if (nivel == NIVEL_2){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_2;
         printf("NIVEL 2\n\n");
-        if (camino_por_defecto){
+        if (camino_por_defecto(configuracion)){
             inicializar_entradas_torres(juego, &entrada, &torre);
             obtener_camino((*juego).nivel.camino_2, &(*juego).nivel.tope_camino_2, entrada, torre);
         }
@@ -369,7 +371,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
     else if (nivel == NIVEL_3){
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_3;
         printf("NIVEL 3\n\n");
-        if (camino_por_defecto){
+        if (camino_por_defecto(configuracion)){
             inicializar_entradas_torres(juego, &entrada, &torre);
             obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
             inicializar_entradas_torres(juego, &entrada, &torre);
@@ -381,7 +383,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
     else {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
         printf("NIVEL 4\n\n");
-        if (camino_por_defecto){
+        if (camino_por_defecto(configuracion)){
             inicializar_entradas_torres(juego, &entrada, &torre);
             obtener_camino((*juego).nivel.camino_1, &(*juego).nivel.tope_camino_1, entrada, torre);
             inicializar_entradas_torres(juego, &entrada, &torre);
@@ -390,7 +392,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
         numero_defensores_enanos = configuracion.enanos_iniciales[3];
         numero_defensores_elfos = configuracion.elfos_iniciales[3];
     }
-    if (!camino_por_defecto){
+    if (!camino_por_defecto(configuracion)){
         printf("Obteniendo camino del nivel...\n\n");
         detener_el_tiempo(2);
         obtener_camino_creado(archivo_caminos, (*juego).nivel.camino_1, (*juego).nivel.camino_2, &(*juego).nivel.tope_camino_1, &(*juego).nivel.tope_camino_2);

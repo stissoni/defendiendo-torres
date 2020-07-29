@@ -6,6 +6,9 @@
 #include "defendiendo_torres.h"
 #include "utiles.h"
 
+/*
+ *
+ */
 void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
     float velocidad = 0.3;
     bool se_encontro_grabacion = false;
@@ -18,9 +21,9 @@ void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
             detener_el_tiempo(3);
             char* token = strtok(argv[j], "=");
             strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
-            archivo_grabacion = fopen(nombre_archivo_grabacion, "r");
+            archivo_grabacion = fopen(nombre_archivo_grabacion, LECTURA);
             if (!archivo_grabacion){
-                printf("No se pudo abrir la partida guardada\n");
+                printf("\nNo se pudo abrir la partida guardada\n");
                 return;
             }
             se_encontro_grabacion = true;
@@ -41,12 +44,19 @@ void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
     fclose(archivo_grabacion);
 }
 
+/*
+ *
+ */
 void grabar_partida(juego_t juego, FILE* archivo_grabacion){
     fwrite(&juego, sizeof(juego_t), 1, archivo_grabacion);
 }
+
+/*
+ *
+ */
 void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
     char nombre_archivo_ranking[MAX_NOMBRE];
-    if (strcmp(nombre_archivo_configuracion, "-1") == 0){
+    if (strcmp(nombre_archivo_configuracion, CONFIGURACION_POR_DEFECTO) == 0){
         strcpy(nombre_archivo_ranking, "ranking.csv");
     }
     else {
@@ -54,7 +64,7 @@ void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_a
         strcat(nombre_archivo_ranking,strtok(nombre_archivo_configuracion, "."));
         strcat(nombre_archivo_ranking, ".csv");
     }
-    FILE* archivo_ranking = fopen(nombre_archivo_ranking, "r");
+    FILE* archivo_ranking = fopen(nombre_archivo_ranking, LECTURA);
     if (!archivo_ranking){
 		printf("El archivo de ranking no existe, creando uno nuevo...\n");
 	}
@@ -95,6 +105,9 @@ void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_a
     rename("archivo_ranking_actualizado.csv", nombre_archivo_ranking);
 }
 
+/*
+ *
+ */
 void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
     int numero_defensores = 0;
     for (int i = 0; i < 4; i++){
@@ -107,6 +120,9 @@ void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* p
     guardar_puntaje((*puntaje), nombre_jugador, nombre_archivo_configuracion);
 }
 
+/*
+ *
+ */
 void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONGITUD_CAMINO],coordenada_t camino_2[MAX_LONGITUD_CAMINO], int* tope_camino_1, int* tope_camino_2){
     int nivel;
     int numero_camino;
@@ -155,6 +171,9 @@ void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONG
     }
 }
 
+/*
+ *
+ */
 void cargar_configuracion_por_defecto(configuracion_t* configuracion){
     (*configuracion).resistencia_torres[0] = 600;
     (*configuracion).resistencia_torres[1] = 600;
@@ -180,8 +199,11 @@ void cargar_configuracion_por_defecto(configuracion_t* configuracion){
     strcpy((*configuracion).archivo_caminos, "-1");
 }
 
+/*
+ *
+ */
 bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], configuracion_t* configuracion){
-    FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, "r");
+    FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, LECTURA);
 	if (!archivo_configuracion){
 		printf("El archivo de configuracion no existe\n");
 		return false;
@@ -249,8 +271,11 @@ bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], config
     return true;
 }
 
+/*
+ *
+ */
 void crear_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE]){
-    FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, "w");
+    FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, ESCRITURA);
 	if (!archivo_configuracion){
 		printf("No se puede crear el archivo.\n");
 		return;
@@ -310,6 +335,9 @@ void crear_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE]){
     fclose(archivo_configuracion);
 }
 
+/*
+ *
+ */
 void mostrar_camino_creado(juego_t* juego_temporal, char terreno[MAX_TERRENO][MAX_TERRENO], int nivel, int filas_terreno, int columnas_terreno){
     cargar_camino(*juego_temporal, terreno, 1);
     cargar_camino(*juego_temporal, terreno, 2);
@@ -319,6 +347,9 @@ void mostrar_camino_creado(juego_t* juego_temporal, char terreno[MAX_TERRENO][MA
     imprimir_lineas(columnas_terreno);
 }
 
+/*
+ *
+ */
 bool movimiento_valido(char movimiento, juego_t juego_temporal, coordenada_t coordenada_actual){
     if (juego_temporal.nivel_actual == 1 || juego_temporal.nivel_actual == 2){
         if (coordenada_actual.fil == 0 && movimiento == 'w'){
@@ -351,8 +382,11 @@ bool movimiento_valido(char movimiento, juego_t juego_temporal, coordenada_t coo
     return true;
 }
 
+/*
+ *
+ */
 void crear_caminos(char nombre_archivo_camino[MAX_NOMBRE]){
-    FILE* caminos = fopen(nombre_archivo_camino, "w");
+    FILE* caminos = fopen(nombre_archivo_camino, ESCRITURA);
 	if (!caminos){
 		printf("No se puede crear el archivo.\n");
 		return;
@@ -424,9 +458,12 @@ void crear_caminos(char nombre_archivo_camino[MAX_NOMBRE]){
     fclose(caminos);
 }
 
+/*
+ *
+ */
 void mostrar_ranking(int numero_jugadores_a_mostrar, char nombre_archivo_ranking[MAX_NOMBRE]){
     printf("Archivo de ranking: %s\n", nombre_archivo_ranking);
-    FILE* ranking = fopen(nombre_archivo_ranking, "r");
+    FILE* ranking = fopen(nombre_archivo_ranking, LECTURA);
 	if (!ranking){
 		printf("El archivo de ranking no existe\n");
 		return;
@@ -442,23 +479,10 @@ void mostrar_ranking(int numero_jugadores_a_mostrar, char nombre_archivo_ranking
     }
     fclose(ranking);
 }
+
 /*
-void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
-    float velocidad_repeticion = 0.5;
-    char nombre_archivo_repeticion[MAX_NOMBRE];
-    for (int j = 2; j < argc; j++){
-        if(strncmp(argv[j], "velocidad=", strlen("velocidad=")) == 0){
-            velocidad_repeticion = (float) atof(&(argv[j][strlen("velocidad=")])); 
-            printf("Velocidad de reproduccion: %f\n", velocidad_repeticion);
-        }
-        if (strncmp(argv[j], "grabacion=", strlen("grabacion=")) == 0){
-            char* token = strtok(argv[j], "=");
-            strcpy(nombre_archivo_repeticion,strtok(NULL, "="));
-            printf("Nombre archivo de repeticion: %s\n", nombre_archivo_repeticion);
-        }
-    }
-}
-*/
+ *
+ */
 void ejecutar_comando_ranking(int argc, char* argv[]){
     int numero_jugadores_a_mostrar = MOSTRAR_TODOS;
     char nombre_archivo_configuracion[MAX_NOMBRE];
@@ -480,6 +504,9 @@ void ejecutar_comando_ranking(int argc, char* argv[]){
     mostrar_ranking(numero_jugadores_a_mostrar, nombre_archivo_ranking);
 }
 
+/*
+ *
+ */
 void ejecutar_comando_crear_camino(int argc, char* argv[]){
     if (argc < 3){
         printf("Debes especificar el nombre del archivo para el camino\n");
@@ -490,6 +517,9 @@ void ejecutar_comando_crear_camino(int argc, char* argv[]){
     crear_caminos(nombre_archivo_camino);
 }
 
+/*
+ *
+ */
 void ejecutar_comando_crear_configuracion(int argc, char* argv[]){
     if (argc < 3){
         printf("Debes especificar el nombre del archivo para la configuracion\n");
