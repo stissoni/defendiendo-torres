@@ -6,11 +6,8 @@
 #include "defendiendo_torres.h"
 #include "utiles.h"
 
-/*
- *
- */
 void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
-    float velocidad = 0.3;
+    float velocidad = (float) 0.3;
     bool se_encontro_grabacion = false;
     char nombre_archivo_grabacion[MAX_NOMBRE];
     FILE* archivo_grabacion;
@@ -19,7 +16,7 @@ void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
         if(strncmp(argv[j], "grabacion=", strlen("grabacion=")) == 0){
             printf("ABRIENDO PARTIDA GUARDADA...\n");
             detener_el_tiempo(3);
-            char* token = strtok(argv[j], "=");
+            strtok(argv[j], "=");
             strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
             archivo_grabacion = fopen(nombre_archivo_grabacion, LECTURA);
             if (!archivo_grabacion){
@@ -44,15 +41,13 @@ void ejecutar_comando_poneme_la_repe(int argc, char* argv[]){
     fclose(archivo_grabacion);
 }
 
-/*
- *
- */
+
 void grabar_partida(juego_t juego, FILE* archivo_grabacion){
     fwrite(&juego, sizeof(juego_t), 1, archivo_grabacion);
 }
 
-/*
- *
+/* Abre el archivo de ranking en formato .csv a partir del nombre del archivo de configuracion.
+ * Graba el nombre y el puntaje del jugador.
  */
 void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
     char nombre_archivo_ranking[MAX_NOMBRE];
@@ -105,9 +100,6 @@ void guardar_puntaje(int puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_a
     rename("archivo_ranking_actualizado.csv", nombre_archivo_ranking);
 }
 
-/*
- *
- */
 void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* puntaje, char nombre_jugador[MAX_NOMBRE], char nombre_archivo_configuracion[MAX_NOMBRE]){
     int numero_defensores = 0;
     for (int i = 0; i < 4; i++){
@@ -120,9 +112,6 @@ void obtener_puntaje(configuracion_t configuracion, int enemigos_muertos, int* p
     guardar_puntaje((*puntaje), nombre_jugador, nombre_archivo_configuracion);
 }
 
-/*
- *
- */
 void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONGITUD_CAMINO],coordenada_t camino_2[MAX_LONGITUD_CAMINO], int* tope_camino_1, int* tope_camino_2){
     int nivel;
     int numero_camino;
@@ -171,9 +160,6 @@ void obtener_camino_creado(FILE* archivo_caminos, coordenada_t camino_1[MAX_LONG
     }
 }
 
-/*
- *
- */
 void cargar_configuracion_por_defecto(configuracion_t* configuracion){
     (*configuracion).resistencia_torres[0] = 600;
     (*configuracion).resistencia_torres[1] = 600;
@@ -199,9 +185,6 @@ void cargar_configuracion_por_defecto(configuracion_t* configuracion){
     strcpy((*configuracion).archivo_caminos, "-1");
 }
 
-/*
- *
- */
 bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], configuracion_t* configuracion){
     FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, LECTURA);
 	if (!archivo_configuracion){
@@ -271,8 +254,8 @@ bool obtener_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE], config
     return true;
 }
 
-/*
- *
+/* Recibe el nombre del archivo de configuracion.
+ * Se lo abre en modo escritura y se le pide al usuario que decida los parametros del juego.
  */
 void crear_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE]){
     FILE* archivo_configuracion = fopen(nombre_archivo_configuracion, ESCRITURA);
@@ -335,7 +318,7 @@ void crear_configuracion(char nombre_archivo_configuracion[MAX_NOMBRE]){
     fclose(archivo_configuracion);
 }
 
-/*
+/* Muestra como va quedando el camino que el usuario creo.
  *
  */
 void mostrar_camino_creado(juego_t* juego_temporal, char terreno[MAX_TERRENO][MAX_TERRENO], int nivel, int filas_terreno, int columnas_terreno){
@@ -347,7 +330,7 @@ void mostrar_camino_creado(juego_t* juego_temporal, char terreno[MAX_TERRENO][MA
     imprimir_lineas(columnas_terreno);
 }
 
-/*
+/* Verifica si la posicion que elige el usuario para crear el camino es valida.
  *
  */
 bool movimiento_valido(char movimiento, juego_t juego_temporal, coordenada_t coordenada_actual){
@@ -381,9 +364,9 @@ bool movimiento_valido(char movimiento, juego_t juego_temporal, coordenada_t coo
     }
     return true;
 }
-
-/*
- *
+ 
+/* Recibe el nombre del archivo de caminos y lo abre en modo escritura.
+ * El usuario va decidiendo con W A S D como arma el camino. Se valida y se guarda en el archivo.
  */
 void crear_caminos(char nombre_archivo_camino[MAX_NOMBRE]){
     FILE* caminos = fopen(nombre_archivo_camino, ESCRITURA);
@@ -458,7 +441,7 @@ void crear_caminos(char nombre_archivo_camino[MAX_NOMBRE]){
     fclose(caminos);
 }
 
-/*
+/* A partir del numero de jugadores a mostrar y el nombre del archivo, se abre y se muestra el ranking.
  *
  */
 void mostrar_ranking(int numero_jugadores_a_mostrar, char nombre_archivo_ranking[MAX_NOMBRE]){
@@ -480,9 +463,6 @@ void mostrar_ranking(int numero_jugadores_a_mostrar, char nombre_archivo_ranking
     fclose(ranking);
 }
 
-/*
- *
- */
 void ejecutar_comando_ranking(int argc, char* argv[]){
     int numero_jugadores_a_mostrar = MOSTRAR_TODOS;
     char nombre_archivo_configuracion[MAX_NOMBRE];
@@ -494,7 +474,7 @@ void ejecutar_comando_ranking(int argc, char* argv[]){
             printf("Jugadores a mostrar: %i\n", numero_jugadores_a_mostrar);
         }
         if (strncmp(argv[j], CONFIG, strlen(CONFIG)) == 0){
-            char* token = strtok(argv[j], "=");
+            strtok(argv[j], "=");
             strcpy(nombre_archivo_configuracion,strtok(NULL, "."));
             strcpy(nombre_archivo_ranking, "ranking_");
             strcat(nombre_archivo_ranking, nombre_archivo_configuracion);
@@ -504,9 +484,6 @@ void ejecutar_comando_ranking(int argc, char* argv[]){
     mostrar_ranking(numero_jugadores_a_mostrar, nombre_archivo_ranking);
 }
 
-/*
- *
- */
 void ejecutar_comando_crear_camino(int argc, char* argv[]){
     if (argc < 3){
         printf("Debes especificar el nombre del archivo para el camino\n");
@@ -517,9 +494,6 @@ void ejecutar_comando_crear_camino(int argc, char* argv[]){
     crear_caminos(nombre_archivo_camino);
 }
 
-/*
- *
- */
 void ejecutar_comando_crear_configuracion(int argc, char* argv[]){
     if (argc < 3){
         printf("Debes especificar el nombre del archivo para la configuracion\n");

@@ -5,6 +5,7 @@
 
 #include "defendiendo_torres.h"
 #include "comandos.h"
+#include "utiles.h"
 
 #define BUENO 'B'
 #define REGULAR 'R'

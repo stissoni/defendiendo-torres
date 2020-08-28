@@ -9,7 +9,6 @@
 #include "utiles.h"
 #include "comandos.h"
 
-
 #define RESPUESTA_AFIRMATIVA 'S'
 #define ENANO 'G'
 #define ELFO 'L'
@@ -31,7 +30,6 @@
 #define ENEMIGOS_NIVEL_2 200
 #define ENEMIGOS_NIVEL_3 300
 #define ENEMIGOS_NIVEL_4 500
-
 
 void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion, FILE* archivo_caminos);
 void colocar_defensor(juego_t* juego, char tipo_defensor);
@@ -60,6 +58,9 @@ int main(int argc , char *argv[]){
     return 0;
 }
 
+/* Verifica si el camino que se encuentra en la configuracion es el por defecto.
+ *
+ */
 bool camino_por_defecto(configuracion_t configuracion){
     if (strcmp(configuracion.archivo_caminos, CAMINO_POR_DEFECTO) == 0){
         return true;
@@ -67,6 +68,9 @@ bool camino_por_defecto(configuracion_t configuracion){
     return false;
 }
 
+/* A partir de los parametros ingresados por consola, se juega la partida.
+ *
+ */
 void jugar_partida(int argc, char* argv[]){
     char nombre_archivo_configuracion[MAX_NOMBRE];
     char nombre_archivo_grabacion[MAX_NOMBRE];
@@ -76,7 +80,7 @@ void jugar_partida(int argc, char* argv[]){
     FILE* archivo_grabacion;
     for (int j = 2; j < argc; j++){
         if (strncmp(argv[j], GRABACION, strlen(GRABACION)) == 0){
-            char* token = strtok(argv[j], "=");
+            strtok(argv[j], "=");
             strcpy(nombre_archivo_grabacion,strtok(NULL, "="));
             archivo_grabacion = fopen(nombre_archivo_grabacion, ESCRITURA);
             if (!archivo_grabacion){
@@ -87,7 +91,7 @@ void jugar_partida(int argc, char* argv[]){
             }
         }
         if (strncmp(argv[j], CONFIG, strlen(CONFIG)) == 0){
-            char* token = strtok(argv[j], "=");
+            strtok(argv[j], "=");
             strcpy(nombre_archivo_configuracion, strtok(NULL, "="));
             se_cargo_configuracion = obtener_configuracion(nombre_archivo_configuracion, &configuracion);
         }
@@ -115,7 +119,7 @@ void jugar_partida(int argc, char* argv[]){
     animos(&viento, &humedad , &animo_legolas , &animo_gimli, configuracion);
     int numero_enemigos_muertos = 0;
     char nombre_jugador[MAX_NOMBRE];
-    printf("Ingresa tu usuario por favor: ");
+    printf("\nIngresa tu usuario por favor: ");
     scanf("%s", nombre_jugador);
     int puntaje;
     /* ................... JUGAR PARTIDA ................... */
@@ -124,7 +128,7 @@ void jugar_partida(int argc, char* argv[]){
     for (int nivel = NIVEL_1; (nivel <= NIVEL_4) && (estado_juego(juego) == JUEGO_JUGANDO); nivel++){
         inicializar_nivel(&juego, nivel, configuracion, archivo_caminos);
         int defensores_extra_colocados = 0;
-        while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
+            while ((estado_nivel(juego.nivel) == NIVEL_JUGANDO) && (estado_juego(juego) == JUEGO_JUGANDO)){
             system("clear");
             jugar_turno(&juego);
             mostrar_juego(juego);
@@ -145,6 +149,7 @@ void jugar_partida(int argc, char* argv[]){
     if(se_graba_partida){
         fclose(archivo_grabacion);
     }
+    system("clear");
     obtener_puntaje(configuracion, numero_enemigos_muertos, &puntaje, nombre_jugador, nombre_archivo_configuracion);
     imprimir_resultado(estado_juego(juego));
 }
@@ -380,7 +385,7 @@ void inicializar_nivel(juego_t* juego, int nivel, configuracion_t configuracion,
         numero_defensores_enanos = configuracion.enanos_iniciales[2];
         numero_defensores_elfos = configuracion.elfos_iniciales[2];
     }
-    else {
+    else if (nivel == NIVEL_4) {
         (*juego).nivel.max_enemigos_nivel = ENEMIGOS_NIVEL_4;
         printf("NIVEL 4\n\n");
         if (camino_por_defecto(configuracion)){
