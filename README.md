@@ -5,11 +5,11 @@
 
  Se recomienda un entorno de linux para compilar el codigo. Simplemente clonar el repositorio y ejecutar.
  
-    gcc juego.c defendiendo_torres.c animos.c utiles.o -o test
+    gcc juego.c defendiendo_torres.c animos.c utiles.o comandos.c -o defendiendo
 
 Para ejecutar el programa
 
-    ./test
+    ./defendiendo
     
 O simplemente clickear el siguiente boton, y ejecutar Run
 
