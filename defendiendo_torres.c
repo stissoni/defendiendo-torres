@@ -2,14 +2,16 @@
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "defendiendo_torres.h"
+#include "comandos.h"
+#include "utiles.h"
 
 #define BUENO 'B'
 #define REGULAR 'R'
 #define MALO 'M'
 #define RESISTENCIA_INICIAL_TORRE 600
 #define RESISTENCIA_TORRE_DESTRUIDA 0
-#define DEFENSORES_EXTRA 10
 #define PROBABILIDAD_CRITICO_25 25
 #define PROBABILIDAD_CRITICO_10 10
 #define PROBABILIDAD_CRITICO_0 0
@@ -58,30 +60,50 @@ int enemigos_muertos(nivel_t nivel){
     return enemigos_muertos;
 }
 
-void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legolas, char animo_gimli){
-    (*juego).torres.resistencia_torre_1 = RESISTENCIA_INICIAL_TORRE;
-    (*juego).torres.resistencia_torre_2 = RESISTENCIA_INICIAL_TORRE;
-    (*juego).torres.elfos_extra = DEFENSORES_EXTRA;
-    (*juego).torres.enanos_extra = DEFENSORES_EXTRA;
-    (*juego).fallo_legolas = viento / 2;
-    (*juego).fallo_gimli = humedad / 2;
-    if (animo_gimli == BUENO){
-        (*juego).critico_gimli = PROBABILIDAD_CRITICO_25;
+void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legolas, char animo_gimli, configuracion_t configuracion){
+    (*juego).torres.resistencia_torre_1 = configuracion.resistencia_torres[0];
+    (*juego).torres.resistencia_torre_2 = configuracion.resistencia_torres[1];
+    (*juego).torres.elfos_extra = configuracion.elfos_extra[0];
+    (*juego).torres.enanos_extra = configuracion.enanos_extra[0]; 
+    if (configuracion.animo_elfos[0] == POR_DEFECTO){
+        (*juego).fallo_legolas = viento / 2;
     }
-    if (animo_gimli == REGULAR){
-        (*juego).critico_gimli = PROBABILIDAD_CRITICO_10;
+    else {
+        (*juego).fallo_legolas = configuracion.animo_elfos[0];
     }
-    if (animo_gimli == MALO){
-        (*juego).critico_gimli = PROBABILIDAD_CRITICO_0;
+    if (configuracion.animo_enanos[0] == POR_DEFECTO){
+        (*juego).fallo_gimli = humedad / 2;
     }
-    if (animo_legolas == BUENO){
-        (*juego).critico_legolas = PROBABILIDAD_CRITICO_25;
+    else {
+        (*juego).fallo_gimli = configuracion.animo_enanos[0];
     }
-    if (animo_legolas == REGULAR){
-        (*juego).critico_legolas = PROBABILIDAD_CRITICO_10;
+    if (configuracion.animo_enanos[1] == POR_DEFECTO){
+        if (animo_gimli == BUENO){
+            (*juego).critico_gimli = PROBABILIDAD_CRITICO_25;
+        }
+        if (animo_gimli == REGULAR){
+            (*juego).critico_gimli = PROBABILIDAD_CRITICO_10;
+        }
+        if (animo_gimli == MALO){
+            (*juego).critico_gimli = PROBABILIDAD_CRITICO_0;
+        }
     }
-    if (animo_legolas == MALO){
-        (*juego).critico_legolas = PROBABILIDAD_CRITICO_0;
+    else {
+        (*juego).critico_gimli = configuracion.animo_enanos[1];
+    }
+    if (configuracion.animo_elfos[1] == POR_DEFECTO){
+        if (animo_legolas == BUENO){
+            (*juego).critico_legolas = PROBABILIDAD_CRITICO_25;
+        }
+        if (animo_legolas == REGULAR){
+            (*juego).critico_legolas = PROBABILIDAD_CRITICO_10;
+        }
+        if (animo_legolas == MALO){
+            (*juego).critico_legolas = PROBABILIDAD_CRITICO_0;
+        }
+    }
+    else {
+        (*juego).critico_legolas = configuracion.animo_elfos[1];
     }
 }
 
@@ -152,7 +174,7 @@ void imprimir_terreno(char terreno[MAX_TERRENO][MAX_TERRENO], int filas_terreno,
         for (int col = 0; col < columnas_terreno; col++){
             if (col == 0){
                 if (fil == 0){
-                    if (terreno[fil][col] == ORCO || terreno[fil][col] == ENANO || terreno[fil][col] == ELFO){
+                    if (terreno[fil][col] == ORCO || terreno[fil][col] == ENANO || terreno[fil][col] == ELFO || terreno[fil][col] == ENTRADA || terreno[fil][col] == TORRE){
                         printf(" 0 |  %c ", terreno[fil][col]);
                     }
                     else {

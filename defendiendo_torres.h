@@ -4,11 +4,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 #define MAX_FILAS 30
 #define MAX_COLUMNAS 30
 #define MAX_LONGITUD_CAMINO 200
 #define MAX_ENEMIGOS 500
 #define MAX_DEFENSORES 50
+#define MAX_VECTOR 100
+#define MAX_NOMBRE 100
+
+typedef struct configuracion{
+    int resistencia_torres[MAX_VECTOR];
+    int enanos_iniciales[MAX_VECTOR];
+    int elfos_iniciales[MAX_VECTOR];
+    int enanos_extra[MAX_VECTOR];
+    int elfos_extra[MAX_VECTOR];
+    int animo_enanos[MAX_VECTOR];
+	int animo_elfos[MAX_VECTOR];
+    float velocidad;
+    char archivo_caminos[MAX_NOMBRE];
+} configuracion_t;
 
 typedef struct coordenada {
 	int fil;
@@ -65,7 +80,7 @@ typedef struct juego {
  * los ataques críticos y fallo de Legolas y Gimli.
  * NO inicializará el primer nivel.
  */
-void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legolas, char animo_gimli);
+void inicializar_juego(juego_t* juego, int viento, int humedad, char animo_legolas, char animo_gimli, configuracion_t configuracion);
 
 /*
  * Recibe un juego con todas sus estructuras válidas. 
